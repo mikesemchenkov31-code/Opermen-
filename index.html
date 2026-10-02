@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Курс Опермен. Тренажёр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #EEEEEC;
+  --card: #FFFFFF;
+  --ink: #1F1F1F;
+  --muted: #5C5C5C;
+  --line: #CFCFCB;
+  --accent: #D42A1F;
+  --ok: #1B7A3E;
+  --ok-bg: #E2F2E8;
+  --bad: #B3261E;
+  --bad-bg: #FBE6E4;
+  --mark: #F7D2CD;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #161616;
+    --card: #222222;
+    --ink: #EDEDEB;
+    --muted: #A9A9A5;
+    --line: #3B3B3B;
+    --accent: #FF5B4D;
+    --ok: #6FD497;
+    --ok-bg: #15301E;
+    --bad: #FF8A80;
+    --bad-bg: #3A1D1B;
+    --mark: #5C2420;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #161616;
+  --card: #222222;
+  --ink: #EDEDEB;
+  --muted: #A9A9A5;
+  --line: #3B3B3B;
+  --accent: #FF5B4D;
+  --ok: #6FD497;
+  --ok-bg: #15301E;
+  --bad: #FF8A80;
+  --bad-bg: #3A1D1B;
+  --mark: #5C2420;
+}
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'PT Serif', Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  line-height: 1.55;
+}
+.wrap { max-width: 680px; margin: 0 auto; padding: 0 16px 56px; }
+
+.mast { border-top: 8px solid var(--ink); border-bottom: 3px solid var(--accent); padding: 14px 0 12px; margin-bottom: 18px; }
+.mast-title {
+  margin: 0;
+  font-family: 'Oswald', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(38px, 11vw, 60px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.mast-sub { margin: 8px 0 0; color: var(--muted); font-size: 16px; }
+
+.prog { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bar { height: 100%; background: var(--accent); transition: width .3s ease; }
+.count { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
+.resume { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 20px 18px; margin-top: 18px; }
+.kind { margin: 0 0 6px; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 17px; color: var(--accent); }
+.q { margin: 0 0 14px; font-size: 21px; line-height: 1.35; font-weight: 700; }
+.lead { margin: 0 0 14px; }
+
+.opt {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  width: 100%; min-height: 54px; margin-top: 10px; padding: 12px 14px;
+  text-align: left; font: inherit; font-size: 17px; line-height: 1.4;
+  color: var(--ink); background: var(--card);
+  border: 1.5px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+.opt:hover:not(:disabled) { border-color: var(--ink); }
+.opt:disabled { cursor: default; color: var(--ink); }
+.opt.correct { border-color: var(--ok); background: var(--ok-bg); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.opt.dim { opacity: .65; }
+.tag { flex: none; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 14px; }
+.correct .tag { color: var(--ok); }
+.wrong .tag { color: var(--bad); }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.fb { margin-top: 16px; padding: 12px 14px; border-left: 5px solid var(--line); border-radius: 4px; background: var(--paper); }
+.fb.ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.fb.bad { border-left-color: var(--bad); background: var(--bad-bg); }
+
+.primary {
+  display: block; width: 100%; min-height: 54px; margin-top: 16px; padding: 12px 18px;
+  font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 20px; letter-spacing: .02em;
+  color: var(--paper); background: var(--ink); border: 0; border-radius: 6px; cursor: pointer;
+}
+.primary:disabled { opacity: .35; cursor: not-allowed; }
+.linklike { background: none; border: 0; padding: 4px 0; font: inherit; font-size: 15px; color: var(--accent); text-decoration: underline; cursor: pointer; }
+
+.row { margin-top: 16px; }
+.row label { display: block; margin-bottom: 6px; }
+select, textarea {
+  width: 100%; font: inherit; font-size: 17px; color: var(--ink); background: var(--card);
+  border: 1.5px solid var(--line); border-radius: 6px;
+}
+select { min-height: 50px; padding: 0 10px; }
+textarea { min-height: 92px; padding: 10px 12px; resize: vertical; line-height: 1.45; }
+.row.ok select { border-color: var(--ok); }
+.row.bad select { border-color: var(--bad); }
+.rowfb { margin-top: 4px; font-size: 16px; }
+.row.ok .rowfb { color: var(--ok); }
+.row.bad .rowfb { color: var(--bad); }
+
+.field { margin-top: 18px; }
+.field strong { display: block; }
+.hint { display: block; color: var(--muted); font-size: 15px; margin-bottom: 6px; }
+
+.model { margin-top: 20px; padding-left: 14px; border-left: 4px solid var(--accent); }
+.model h3 { margin: 0 0 8px; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 20px; }
+.model p { margin: 0 0 10px; }
+fieldset { margin: 20px 0 0; padding: 0; border: 0; }
+legend { padding: 0; margin-bottom: 6px; font-weight: 700; }
+.check { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 8px 0; cursor: pointer; }
+.check input { flex: none; width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--accent); }
+
+.score { margin: 0; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 700; font-size: 76px; line-height: 1; }
+.score small { font-size: 28px; font-weight: 500; color: var(--muted); }
+.pct { margin: 4px 0 12px; color: var(--muted); }
+.parts { margin: 16px 0 0; padding: 0; list-style: none; }
+.parts li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.parts li:last-child { border-bottom: 1px solid var(--line); }
+.todo { margin: 6px 0 0; padding-left: 22px; }
+.note { margin-top: 18px; color: var(--muted); font-size: 15px; }
+
+.back { display: inline-block; margin: 12px 0 6px; }
+.secondary {
+  display: block; width: 100%; min-height: 54px; margin-top: 10px; padding: 12px 18px;
+  font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 20px; letter-spacing: .02em;
+  color: var(--ink); background: transparent; border: 1.5px solid var(--ink); border-radius: 6px; cursor: pointer;
+}
+.mods { margin-top: 4px; }
+.mod {
+  display: flex; align-items: center; gap: 16px; width: 100%; min-height: 76px; margin-top: 10px; padding: 14px 16px;
+  text-align: left; font: inherit; color: var(--ink); background: var(--card);
+  border: 1.5px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+.mod:hover:not(:disabled) { border-color: var(--ink); }
+.mod:disabled { cursor: default; opacity: .55; }
+.mod-n { flex: none; width: 40px; text-align: center; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 700; font-size: 40px; line-height: 1; color: var(--accent); }
+.mod:disabled .mod-n { color: var(--muted); }
+.mod-body { display: flex; flex-direction: column; gap: 2px; }
+.mod-title { font-weight: 700; font-size: 18px; line-height: 1.3; }
+.mod-status { font-size: 15px; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) { .bar { transition: none; } }
+@media (min-width: 700px) { body { font-size: 19px; } .card { padding: 26px 26px; } }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 56px; padding-top: 6px; }
+.topbar .back { margin: 0; }
+.hide { visibility: hidden; }
+.iconbtn {
+  flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+  color: var(--ink); background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; cursor: pointer;
+}
+.iconbtn:hover { border-color: var(--ink); }
+.iconbtn svg { width: 22px; height: 22px; }
+.sec-title {
+  margin: 28px 0 0; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500;
+  font-size: 15px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.mod-ic { flex: none; width: 40px; display: grid; place-items: center; color: var(--accent); }
+.mod-ic svg { width: 30px; height: 30px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip {
+  position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px;
+  font-size: 16px; border: 1.5px solid var(--line); border-radius: 22px; background: var(--card); cursor: pointer;
+}
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip:has(input:checked) { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.grp { margin-top: 18px; padding-top: 6px; border-top: 1px solid var(--line); }
+.grp:first-of-type { border-top: 0; }
+.check.master span { font-weight: 700; }
+.check.sub { padding-left: 34px; }
+.cnt { color: var(--muted); font-size: 15px; white-space: nowrap; }
+.check span.t { flex: 1; }
+.soon { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.startbar {
+  position: sticky; bottom: 0; z-index: 2; margin: 18px -16px 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--paper); border-top: 1px solid var(--line);
+}
+.startbar .primary { margin-top: 6px; }
+.selcount { margin: 0; font-size: 16px; color: var(--muted); }
+.vid { display: inline-block; margin-top: 8px; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 16px; color: var(--accent); }
+.opt.sel { border-color: var(--ink); background: var(--paper); box-shadow: inset 4px 0 0 var(--accent); }
+.exbar { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 8px; }
+.exbar span { color: var(--muted); font-size: 15px; }
+.timer { font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 700; font-size: 26px; font-variant-numeric: tabular-nums; color: var(--ink) !important; }
+.timer.low { color: var(--bad) !important; }
+.rev { padding: 14px 0; border-top: 1px solid var(--line); }
+.rev h3 { margin: 0 0 6px; font-size: 17px; line-height: 1.4; }
+.rev p { margin: 4px 0 0; font-size: 16px; }
+.st-ok { color: var(--ok); font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; }
+.st-bad { color: var(--bad); font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; }
+.muted { color: var(--muted); }
+.flash { width: 100%; margin-top: 18px; text-align: center; font: inherit; color: var(--ink); cursor: pointer; }
+.flash .ft { font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 700; font-size: 30px; line-height: 1.15; }
+.flash .fd { font-size: 19px; line-height: 1.5; }
+.flash .fh { color: var(--muted); font-size: 15px; }
+.duo { display: flex; gap: 10px; }
+.duo > * { flex: 1; font-size: 18px; padding-left: 10px; padding-right: 10px; }
+.big2 { display: flex; gap: 24px; flex-wrap: wrap; }
+.big2 div { flex: 1; min-width: 120px; }
+.big2 b { display: block; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-size: 44px; line-height: 1; }
+.big2 span { color: var(--muted); font-size: 15px; }
+.mrow { padding: 12px 0; border-top: 1px solid var(--line); }
+.mrow:first-child { border-top: 0; }
+.mrow .top { display: flex; justify-content: space-between; gap: 12px; font-weight: 700; font-size: 17px; }
+.mrow .sub { color: var(--muted); font-size: 15px; }
+.mbar { height: 6px; margin-top: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.mbar i { display: block; height: 100%; background: var(--accent); }
+
+/* ---------- Отметка «сложный» ---------- */
+.q:has(+ .flagbtn) { margin-bottom: 8px; }
+.flagbtn {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; margin: 0 0 14px; padding: 4px 14px 4px 10px;
+  font: inherit; font-size: 15px; line-height: 1.2; color: var(--muted); background: none;
+  border: 1.5px solid var(--line); border-radius: 18px; cursor: pointer;
+}
+.flagbtn svg { width: 18px; height: 18px; flex: none; }
+.flagbtn:hover { border-color: var(--ink); color: var(--ink); }
+.flagbtn.on { color: var(--accent); border-color: var(--accent); background: var(--mark); }
+.flagbtn.on svg path { fill: currentColor; }
+.rev .flagbtn { margin: 6px 0 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .flagbtn { transition: color .15s, border-color .15s, background-color .15s, transform .12s; }
+  .flagbtn.bump svg { animation: pop .35s ease; }
+  .flagbtn:active { transform: scale(.96); }
+}
+
+/* ---------- Сегодня ---------- */
+.today { margin-top: 4px; }
+.tgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.tgrid > div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tgrid b { font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 700; font-size: 30px; line-height: 1; }
+.tgrid span { color: var(--muted); font-size: 14px; line-height: 1.25; }
+.ring {
+  --p: 0; position: relative; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%;
+  background: conic-gradient(var(--accent) calc(var(--p) * 1%), var(--line) 0);
+}
+.ring::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: var(--card); }
+.ring b { position: relative; font-size: 22px; }
+.flame { display: flex; align-items: center; height: 64px; gap: 2px; }
+.flame svg { width: 26px; height: 26px; color: var(--accent); }
+.flame.off svg { color: var(--line); }
+.gauge { display: grid; place-items: center; height: 64px; }
+.today .note { margin-top: 12px; text-align: center; }
+
+/* ---------- Заметки и инструменты вопроса ---------- */
+.qtools { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.qtools .flagbtn { margin: 0; }
+.q:has(+ .qtools) { margin-bottom: 8px; }
+.notebtn.on { color: var(--ink); border-color: var(--ink); background: var(--paper); }
+.notebox { margin: -4px 0 14px; }
+.notebox textarea { min-height: 72px; font-size: 16px; }
+.notebox .hint { margin: 4px 0 0; min-height: 1em; }
+.notelist .rev h3 { font-size: 16px; }
+
+/* ---------- Термины в тексте ---------- */
+.termlink {
+  display: inline; padding: 0; font: inherit; color: inherit; background: none; border: 0; cursor: pointer;
+  text-decoration: underline dotted var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px;
+}
+.termlink:hover { color: var(--accent); }
+.sheet-wrap { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,.45); }
+.sheet {
+  width: 100%; max-width: 680px; max-height: 80vh; overflow: auto; padding: 20px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+  background: var(--card); color: var(--ink); border-radius: 14px 14px 0 0;
+}
+.sheet p { margin: 0 0 12px; }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet-wrap { animation: fadeIn .2s ease both; }
+  .sheet { animation: sheetUp .28s cubic-bezier(.2,.7,.2,1) both; }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheetUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.gtasks { margin-top: 8px; }
+
+/* ---------- Клавиатура ---------- */
+.opt .ot { flex: 1; }
+.kbd { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .kbd {
+    display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+    font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px;
+  }
+  .opt:disabled .kbd { display: none; }
+}
+.kbhint { display: none; }
+@media (hover: hover) and (pointer: fine) { .kbhint { display: block; } }
+
+/* ---------- Ситуация с ветвлением ---------- */
+.bstep { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.bstep:first-child { border-top: 0; padding-top: 0; }
+.bsit { margin: 0 0 4px; font-weight: 700; }
+.opt.mid { border-color: var(--ink); background: var(--paper); }
+.fb.mid { border-left-color: var(--ink); }
+
+/* ---------- Claude ---------- */
+.aibox { margin-top: 12px; }
+.aibtn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px; font: inherit; font-size: 16px;
+  color: var(--ink); background: var(--card); border: 1.5px dashed var(--accent); border-radius: 22px; cursor: pointer;
+}
+.aibtn svg { width: 18px; height: 18px; color: var(--accent); }
+.aibtn[hidden] { display: none; }
+.aiout:not(:empty) { margin-top: 10px; padding: 12px 14px; border-left: 4px solid var(--accent); border-radius: 4px; background: var(--paper); white-space: pre-wrap; font-size: 17px; }
+.aiout .muted { font-style: italic; }
+.aistop { margin-left: 8px; }
+
+/* ---------- Настройки ---------- */
+.setrow { margin-top: 6px; }
+.codebox { width: 100%; min-height: 90px; margin-top: 10px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; word-break: break-all; }
+.okmsg { color: var(--ok); }
+.errmsg { color: var(--bad); }
+:root[data-fs="l"] .wrap, :root[data-fs="l"] .sheet { zoom: 1.12; }
+:root[data-fs="xl"] .wrap, :root[data-fs="xl"] .sheet { zoom: 1.25; }
+
+/* ---------- Доступ и кабинет ---------- */
+body.gated #searchBtn, body.gated #setBtn { display: none; }
+.codein {
+  width: 100%; min-height: 54px; margin-top: 6px; padding: 10px 14px; font: inherit; font-size: 20px; letter-spacing: .06em;
+  color: var(--ink); background: var(--card); border: 1.5px solid var(--line); border-radius: 6px;
+}
+.codein:focus { border-color: var(--ink); outline: none; }
+.adm { padding: 16px; }
+.adm.off { opacity: .6; }
+.adm-top { display: flex; justify-content: space-between; gap: 12px; font-size: 18px; }
+.adm-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.adm-acts .flagbtn { margin: 0; color: var(--ink); }
+.adm-acts select { min-height: 0; width: auto; padding: 2px 4px; font-size: 15px; border: 0; background: none; }
+.devlist { margin: 8px 0 0; padding-left: 20px; font-size: 15px; }
+
+/* ---------- Словарь ---------- */
+.tb-r { display: flex; gap: 8px; }
+.sbox { position: relative; margin-top: 4px; }
+.sbox svg { position: absolute; left: 14px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.sbox input {
+  width: 100%; min-height: 54px; padding: 10px 44px 10px 44px; font: inherit; font-size: 18px; color: var(--ink);
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 27px; -webkit-appearance: none; appearance: none;
+}
+.sbox input:focus { border-color: var(--ink); outline: none; }
+.sbox input::-webkit-search-cancel-button { display: none; }
+.sclear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: 0; border-radius: 21px; background: none; color: var(--muted); font-size: 22px; cursor: pointer; }
+.sclear[hidden] { display: none; }
+.gcount { margin: 10px 0 0; color: var(--muted); font-size: 15px; }
+.term { padding: 14px 0; border-top: 1px solid var(--line); }
+.term:first-child { border-top: 0; padding-top: 0; }
+.term h3 { margin: 0; font-size: 19px; line-height: 1.3; }
+.term p { margin: 4px 0 0; }
+.term .tm { font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 14px; color: var(--accent); }
+mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1px; }
+@media (prefers-reduced-motion: no-preference) { #gl .term { animation: rise .22s ease both; } }
+
+/* ---------- Карточка с переворотом ---------- */
+.flash { display: block; padding: 0; border: 0; background: none; perspective: 1200px; }
+.flip-inner { display: grid; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.3,.7,.2,1); }
+.flash.flipped .flip-inner { transform: rotateY(180deg); }
+.face {
+  grid-area: 1 / 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;
+  min-height: 240px; padding: 24px 20px; background: var(--card); border: 1.5px solid var(--line); border-radius: 8px;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+}
+.face.back { transform: rotateY(180deg); border-color: var(--accent); }
+.fbtns { transition: opacity .25s ease; }
+.fbtns.off { opacity: 0; visibility: hidden; }
+
+/* ---------- Анимации ---------- */
+@keyframes enterF { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: none; } }
+@keyframes enterB { from { opacity: 0; transform: translateX(-22px); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.025); } 100% { transform: scale(1); } }
+@keyframes shake { 0%,100% { transform: none; } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+@keyframes spin { from { transform: rotate(-120deg) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes outL { to { transform: translateX(-115%) rotate(-7deg); opacity: 0; } }
+@keyframes outR { to { transform: translateX(115%) rotate(7deg); opacity: 0; } }
+@keyframes deal { from { transform: translateY(18px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  #app.enter > *:not(.mods) { animation: enterF .34s cubic-bezier(.2,.7,.2,1) both; }
+  #app.enter.back > *:not(.mods) { animation-name: enterB; }
+  #app.enter > *:nth-child(2) { animation-delay: .03s; }
+  #app.enter > *:nth-child(3) { animation-delay: .06s; }
+  #app.enter > *:nth-child(4) { animation-delay: .09s; }
+  #app.enter > *:nth-child(5) { animation-delay: .12s; }
+  #app.enter > *:nth-child(n+6) { animation-delay: .15s; }
+  #app.enter .mods > .mod { animation: enterF .34s cubic-bezier(.2,.7,.2,1) both; }
+  #app.enter.back .mods > .mod { animation-name: enterB; }
+  #app.enter .mods > .mod:nth-child(2) { animation-delay: .04s; }
+  #app.enter .mods > .mod:nth-child(3) { animation-delay: .08s; }
+  #app.enter .mods > .mod:nth-child(4) { animation-delay: .12s; }
+  #app.enter .mods > .mod:nth-child(5) { animation-delay: .16s; }
+  #app.enter .mods > .mod:nth-child(n+6) { animation-delay: .2s; }
+  .fb, .model, #after fieldset, .rowfb:not(:empty), #next { animation: rise .3s ease both; }
+  .opt.correct { animation: pop .35s ease; }
+  .opt.wrong { animation: shake .4s ease; }
+  .opt, .mod, .chip, .iconbtn, .primary, .secondary, select { transition: border-color .15s, background-color .15s, color .15s, box-shadow .15s, transform .12s, opacity .15s; }
+  .opt:active:not(:disabled), .mod:active:not(:disabled), .primary:active:not(:disabled), .secondary:active, .chip:active, .iconbtn:active { transform: scale(.97); }
+  .iconbtn.spin svg { animation: spin .45s cubic-bezier(.2,.7,.2,1); }
+  :root.theming, :root.theming body, :root.theming * {
+    transition: background-color .4s ease, color .4s ease, border-color .4s ease, fill .4s ease !important;
+  }
+  .flash.out-know { animation: outL .3s ease-in forwards; }
+  .flash.out-again { animation: outR .3s ease-in forwards; }
+  .flash.deal { animation: deal .35s cubic-bezier(.2,.7,.2,1) both; }
+}
+@media (prefers-reduced-motion: reduce) { .flip-inner, .fbtns { transition: none; } }
+</style>
+<script>
+try { var f0 = localStorage.getItem('opermen_fs'); if (f0 === 'l' || f0 === 'xl') document.documentElement.setAttribute('data-fs', f0); } catch (e) {}
+try { var t0 = localStorage.getItem('opermen_theme'); if (t0 === 'dark' || t0 === 'light') document.documentElement.setAttribute('data-theme', t0); } catch (e) {}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <button class="linklike back hide" id="toMenu" type="button">← В главное меню</button>
+    <div class="tb-r">
+      <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск термина" title="Поиск термина"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+      <button class="iconbtn" id="themeBtn" type="button"></button>
+      <button class="iconbtn" id="setBtn" type="button" aria-label="Настройки" title="Настройки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* =====================================================================
+   НАСТРОЙКА ДОСТУПА. Впишите сюда данные проекта Supabase.
+   url — Project URL, вида https://xxxxxxxx.supabase.co
+   key — публичный ключ: Publishable key (sb_publishable_...) или anon key
+   Если оставить пустыми, тренажёр открывается без проверки.
+   ===================================================================== */
+var ACCESS = {
+  url: 'https://ldlppfisueszkfyanjvs.supabase.co',
+  key: 'sb_publishable_sOyZebH81WoMdoAJl_-f7g_5pNq4V8u',
+  offlineDays: 7   // сколько дней тренажёр открывается без интернета после последней успешной проверки
+};
+
+(function () {
+  var STORE_KEY = 'opermen_trainer_v2';
+  var THEME_KEY = 'opermen_theme';
+
+  var cardsM1 = [
+    { id: 't1', kind: 'test', topic: 'Определение операционной системы',
+      q: 'Что такое операционная система организации?',
+      opts: [
+        ['Система, которая с помощью ресурсов превращает входы в выходы', true],
+        ['Программа для учёта заказов и платежей', false],
+        ['Отдел, который отвечает за продажи', false],
+        ['Набор правил оплаты труда сотрудников', false]
+      ],
+      exp: 'Операционная система использует ресурсы (персонал, инфраструктуру, информацию, материалы, управление), чтобы превратить входы в выходы. Это базовое определение модуля.' },
+
+    { id: 't2', kind: 'test', topic: 'Признаки процесса',
+      q: 'Что противоречит определению процесса?',
+      opts: [
+        ['Контроль качества проводится отдельно, уже после завершения процесса', true],
+        ['Процесс делится на операции', false],
+        ['У процесса есть клиент', false],
+        ['За каждую операцию отвечает конкретный человек', false]
+      ],
+      exp: 'Контроль качества является неотъемлемой частью процесса: он встроен в операции, а не стоит отдельным этапом в конце. Остальные три утверждения верно описывают процесс.' },
+
+    { id: 't3', kind: 'test', topic: 'Клиент процесса',
+      q: 'Кто может быть клиентом процесса?',
+      opts: [
+        ['Как внешний покупатель, так и внутренний клиент (следующая операция или подразделение)', true],
+        ['Только внешний покупатель', false],
+        ['Только собственник компании', false],
+        ['Только поставщик', false]
+      ],
+      exp: 'У процесса всегда есть клиент, внешний или внутренний. Например, для кассира внутренний клиент это бариста: он получает от кассира заказ.' },
+
+    { id: 't4', kind: 'test', topic: 'Атрибуты выхода процесса',
+      q: 'По каким атрибутам оценивают выход процесса?',
+      opts: [
+        ['Сроки, затраты и качество', true],
+        ['Только затраты', false],
+        ['Число сотрудников и площадь помещения', false],
+        ['Объём продаж за год', false]
+      ],
+      exp: 'Выход процесса описывают тремя атрибутами: сроки, затраты и качество. Улучшить все три сразу трудно, чаще приходится искать баланс.' },
+
+    { id: 't5', kind: 'test', topic: 'Вариабельность',
+      q: 'В обед в кофейне очередь на 20 человек, а в три часа дня зал пустой. К какой категории проблем это относится?',
+      opts: [
+        ['Вариабельность (мура)', true],
+        ['Потери (муда)', false],
+        ['Перенапряжение (мури)', false],
+        ['Брак', false]
+      ],
+      exp: 'Нагрузка скачет: в пик мощности не хватает, в тихие часы она простаивает. Это вариабельность (мура).' },
+
+    { id: 't6', kind: 'test', topic: 'Перенапряжение',
+      q: 'Бариста весь час пик работает без перерыва, а кофемашина не успевает восстановиться. Это:',
+      opts: [
+        ['Перенапряжение (мури)', true],
+        ['Вариабельность (мура)', false],
+        ['Потери (муда)', false],
+        ['Нормальная загрузка', false]
+      ],
+      exp: 'Это нагрузка выше нормы для людей и оборудования. Недолго так работать можно, но затем растут ошибки и усталость.' },
+
+    { id: 't7', kind: 'test', topic: 'Связь стратегии и операционной системы',
+      q: 'Как связаны стратегия компании и операционная система?',
+      opts: [
+        ['Операционная стратегия вытекает из стратегии компании и определяет, как устроена операционная система', true],
+        ['Операционная система создаётся независимо от стратегии', false],
+        ['Стратегия нужна только для рекламы, а на систему не влияет', false],
+        ['Стратегию выбирают после того, как система уже построена', false]
+      ],
+      exp: 'Цепочка такая: миссия и видение, стратегия компании, операционная стратегия, операционная система. Если кофейня делает ставку на скорость, процессы строят вокруг скорости.' },
+
+    { id: 'b1', kind: 'match', topic: 'Ресурсы операционной системы',
+      q: 'Сопоставьте примеры из кофейни с видами ресурсов.',
+      choices: ['Персонал', 'Инфраструктура', 'Информация', 'Материалы', 'Управление'],
+      rows: [
+        ['Бариста и кассир', 'Персонал'],
+        ['Кофемашина и помещение', 'Инфраструктура'],
+        ['Система приёма заказов', 'Информация'],
+        ['Зерно, молоко, стаканы', 'Материалы'],
+        ['График смен и правила обслуживания', 'Управление']
+      ],
+      exp: 'Пять видов ресурсов: персонал, инфраструктура, информация, материалы и управление.' },
+
+    { id: 'b2', kind: 'match', topic: 'Категории потерь',
+      q: 'Отнесите каждую ситуацию к своей категории.',
+      choices: ['Потери', 'Вариабельность', 'Перенапряжение'],
+      rows: [
+        ['Напиток пришлось переделать из-за ошибки в заказе', 'Потери'],
+        ['Сотрудник ходит за молоком, которое лежит не на месте', 'Потери'],
+        ['В обед очередь, в три часа дня зал пустой', 'Вариабельность'],
+        ['Заказы то приходят пачкой, то долго не поступают', 'Вариабельность'],
+        ['Бариста работает без перерыва весь час пик', 'Перенапряжение'],
+        ['Кофемашина работает без остановки на пределе мощности', 'Перенапряжение']
+      ],
+      exp: 'Потери: действия, за которые клиент не платит. Вариабельность: нагрузка скачет. Перенапряжение: нагрузка выше нормы для людей или оборудования.' },
+
+    { id: 'c1', kind: 'case', topic: 'Описание организации как операционной системы',
+      q: 'Кейс: парикмахерская',
+      lead: 'Парикмахерская у метро. Клиенты записываются через мессенджер, мастера работают по сменам, краску и расходники закупают у поставщика. Опишите её как операционную систему, затем сравните с образцом.',
+      fields: [
+        { id: 'in', label: 'Вход', hint: 'Что и кто поступает в систему',
+          model: 'Клиенты с запросом на стрижку или окрашивание, записи из мессенджера, краска и расходные материалы, информация о пожеланиях клиента.' },
+        { id: 'res', label: 'Ресурсы', hint: 'По одному примеру на каждый из пяти видов',
+          model: 'Персонал: мастера и администратор. Инфраструктура: кресла, зеркала, помещение, инструменты. Информация: система записи, база клиентов. Материалы: краска, шампуни, расходники. Управление: график смен, правила обслуживания.' },
+        { id: 'proc', label: 'Процесс', hint: 'Операции по порядку',
+          model: 'Запись, встреча и уточнение пожеланий, мытьё головы, стрижка или окрашивание, оплата. Контроль качества встроен в процесс: мастер сверяет результат с пожеланием клиента до завершения.' },
+        { id: 'out', label: 'Выход', hint: 'Что получает клиент и как это оценить',
+          model: 'Клиент с готовой причёской. Оценка по трём атрибутам: сроки (сколько ждал), затраты (цена и себестоимость), качество (соответствие пожеланию).' },
+        { id: 'loss', label: 'Проблемы', hint: 'По примеру потерь, вариабельности и перенапряжения',
+          model: 'Потери: переделка стрижки из-за недопонимания, поиск инструмента. Вариабельность: вечером очередь, днём простой. Перенапряжение: мастер принимает клиентов без перерыва в пик.' }
+      ],
+      checks: [
+        'Во входе указаны клиенты и материалы или информация, а не только клиент',
+        'Названы все пять видов ресурсов',
+        'Процесс описан как последовательность операций',
+        'Выход оценён по срокам, затратам и качеству',
+        'Приведены примеры потерь, вариабельности и перенапряжения'
+      ],
+      exp: '' },
+
+    { id: 'br1', kind: 'branch', topic: 'Решения управляющего в час пик',
+      q: 'Ситуация: утренний пик в кофейне',
+      lead: 'Вы управляющий кофейней. Примите три решения подряд и посмотрите, к чему они приведут.',
+      max: 6, start: 'n1',
+      nodes: {
+        n1: { text: 'Будний день, 8:30. Очередь растёт до 15 человек, часть клиентов уходит. На смене один кассир и один бариста. Что делаете первым делом?',
+          choices: [
+            { t: 'Смотрю, где именно копится очередь: у кассы или у выдачи', pts: 2, to: 'n2',
+              fb: 'Хорошее начало: сначала найти узкое место, потом действовать. Выясняется, что касса успевает, а заказы копятся у бариста.' },
+            { t: 'Срочно ставлю второго кассира', pts: 0, to: 'n2',
+              fb: 'Касса и так успевала. Очередь просто переехала к выдаче, и заказы у бариста копятся ещё быстрее.' },
+            { t: 'Предлагаю скидку тем, кто готов подождать', pts: 1, to: 'n2',
+              fb: 'Клиенты остаются, но причина очереди никуда не делась. Это лечение симптома, а не проблемы.' }
+          ] },
+        n2: { text: 'Бариста работает без перерыва и ошибается: за час переделали 6 напитков. Как быть?',
+          choices: [
+            { t: 'В пик кассир помогает с простыми напитками и выдачей', pts: 2, to: 'n3',
+              fb: 'Нагрузка на бариста снижается, переделок становится меньше. Вы убрали перенапряжение (мури), из-за которого появлялся брак.' },
+            { t: 'Прошу бариста быть внимательнее', pts: 0, to: 'n3',
+              fb: 'Призыв не меняет систему: нагрузка по-прежнему выше нормы, ошибки продолжаются.' },
+            { t: 'Убираю сложные напитки из меню на часы пик', pts: 1, to: 'n3',
+              fb: 'Работает, но часть клиентов недовольна. Есть варианты без потери выручки.' }
+          ] },
+        n3: { text: 'Пик прошёл. В 15:00 зал пустой, персонал простаивает. Что делаете на будущее?',
+          choices: [
+            { t: 'Меняю график: больше людей утром, меньше днём, а днём готовлю заготовки на утро', pts: 2, to: 'end',
+              fb: 'Вы работаете с вариабельностью (мурой): подстраиваете мощность под спрос и выравниваете нагрузку.' },
+            { t: 'Ничего, так бывает везде', pts: 0, to: 'end',
+              fb: 'Неравномерность нагрузки сохраняется: утром снова очередь, днём простой.' },
+            { t: 'Запускаю дневную акцию, чтобы привлечь клиентов в тихие часы', pts: 1, to: 'end',
+              fb: 'Это частично выравнивает спрос. Лучше всего работает вместе с изменением графика смен.' }
+          ] },
+        end: { end: true, text: 'Хорошее решение начинается с поиска причины: где узкое место, есть ли перенапряжение и как скачет спрос. Это и есть потери, перенапряжение и вариабельность из модуля 1.' }
+      } }
+  ];
+
+  /* Термины для карточек: { t: термин, d: определение } */
+  var termsM1 = [
+    { t: 'Операционная система', d: 'Система, которая с помощью ресурсов превращает входы в выходы.' },
+    { t: 'Процесс', d: 'Последовательность операций, у которой есть клиент и ответственные за каждую операцию. Контроль качества встроен в сами операции.' },
+    { t: 'Внутренний клиент', d: 'Следующая операция или подразделение, которое получает результат процесса. Например, для кассира это бариста.' },
+    { t: 'Атрибуты выхода процесса', d: 'Сроки, затраты и качество. Улучшить все три сразу трудно, обычно ищут баланс.' },
+    { t: 'Ресурсы операционной системы', d: 'Персонал, инфраструктура, информация, материалы и управление.' },
+    { t: 'Потери (муда)', d: 'Действия, за которые клиент не платит: переделки, лишние перемещения, поиск, ожидание.' },
+    { t: 'Вариабельность (мура)', d: 'Неравномерность нагрузки: в пик мощности не хватает, в тихие часы она простаивает.' },
+    { t: 'Перенапряжение (мури)', d: 'Нагрузка выше нормы для людей или оборудования. Ведёт к ошибкам, усталости и поломкам.' },
+    { t: 'Операционная стратегия', d: 'Вытекает из стратегии компании и определяет, как устроена операционная система.' }
+  ];
+
+  /* Видео: в модуле можно указать
+     video: { url: '...', t: '0:00' }               ссылка на всю лекцию модуля
+     videos: { 'Тема задания': { url: '...', t: '12:30' } }  ссылки на фрагменты по темам
+     или в самом задании поле video: { url, t } */
+
+  var modules = [
+    { id: 'm1', n: 1, title: 'Процесс и операционная система', cards: cardsM1, terms: termsM1 },
+    { id: 'm2', n: 2, title: 'Поток и мощность', cards: null },
+    { id: 'm3', n: 3, title: 'Производственные системы и Toyota', cards: null },
+    { id: 'm4', n: 4, title: 'Операционные стратегии', cards: null },
+    { id: 'm5', n: 5, title: 'Управление качеством', cards: null },
+    { id: 'm6', n: 6, title: 'Операционные улучшения', cards: null },
+    { id: 'm7', n: 7, title: 'Индустрия 4.0', cards: null }
+  ];
+
+  var KIND_NAME = { test: 'Тест', match: 'Сопоставление', 'case': 'Кейс', branch: 'Ситуация' };
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>';
+  var IC_BANK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="5" rx="1"/><rect x="4" y="10" width="16" height="5" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg>';
+  var IC_PICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h3M11 6h9M4 12h9M17 12h3M4 18h5M13 18h7"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="18" r="2"/></svg>';
+
+  /* ---------- Общий банк ---------- */
+  var ALL = [], BY_UID = {};
+  modules.forEach(function (m) {
+    if (!m.cards) return;
+    m.cards.forEach(function (c) { c.uid = m.id + '.' + c.id; c.mod = m; ALL.push(c); BY_UID[c.uid] = c; });
+  });
+
+  function maxPts(c) {
+    if (c.kind === 'test') return 1;
+    if (c.kind === 'branch') return c.max;
+    if (c.kind === 'match') return c.rows.length;
+    return c.checks.length;
+  }
+  function totalOf(list) { return list.reduce(function (s, c) { return s + maxPts(c); }, 0); }
+  function plural(n, one, few, many) {
+    var a = n % 10, b = n % 100;
+    if (a === 1 && b !== 11) return one;
+    if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return few;
+    return many;
+  }
+  function nTasks(n) { return n + ' ' + plural(n, 'задание', 'задания', 'заданий'); }
+
+  var app = document.getElementById('app');
+  var store = {};
+  var S = null;        // текущая сессия
+  var cards = [];
+  var state = { results: {}, finished: false };
+
+  function $(id) { return document.getElementById(id); }
+  function toTop() { window.scrollTo(0, 0); }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw) { var p = JSON.parse(raw); if (p && typeof p === 'object') store = p; }
+    } catch (e) { /* хранилище недоступно: работаем без сохранения */ }
+    if (!store.last) {
+      store.last = {};
+      ['bank', 'custom'].concat(modules.map(function (m) { return m.id; })).forEach(function (k) {
+        var st = store[k]; if (!st || !st.results) return;
+        Object.keys(st.results).forEach(function (u) {
+          var c = BY_UID[u] || (k.charAt(0) === 'm' && BY_UID[k + '.' + u]);
+          if (c) store.last[c.uid] = { p: st.results[u], m: maxPts(c), at: 0 };
+        });
+      });
+    }
+    // перенос старого прогресса модулей на новые ключи
+    modules.forEach(function (m) {
+      var st = store[m.id];
+      if (!m.cards || !st || !st.results) return;
+      Object.keys(st.results).forEach(function (k) {
+        if (k.indexOf('.') === -1 && BY_UID[m.id + '.' + k]) { st.results[m.id + '.' + k] = st.results[k]; delete st.results[k]; }
+      });
+    });
+  }
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { /* ignore */ } }
+  function stOf(key) {
+    if (!store[key] || !store[key].results) store[key] = { results: {}, finished: false };
+    return store[key];
+  }
+
+  function recordLast(c, pts) {
+    if (!store.last) store.last = {};
+    var now = Date.now(), full = pts >= maxPts(c);
+    store.last[c.uid] = { p: pts, m: maxPts(c), at: now };
+    if (!store.srs) store.srs = {};
+    var r = store.srs[c.uid];
+    if (!full) store.srs[c.uid] = { step: 0, due: startOfDay(now) + SRS_STEPS[0] * DAY };
+    else if (r && r.due <= now) {
+      r.step++;
+      if (r.step >= SRS_STEPS.length) delete store.srs[c.uid];
+      else r.due = startOfDay(now) + SRS_STEPS[r.step] * DAY;
+    }
+    if (!store.daily) store.daily = { goal: 10, days: {} };
+    var dk = dayKey(now); store.daily.days[dk] = (store.daily.days[dk] || 0) + 1;
+  }
+  function record(c, pts) { state.results[c.uid] = pts; recordLast(c, pts); save(); }
+  function videoOf(c) {
+    if (c.video) return c.video;
+    var m = c.mod;
+    if (m.videos && m.videos[c.topic]) return m.videos[c.topic];
+    return m.video || null;
+  }
+  function vidHtml(c) {
+    var v = videoOf(c);
+    if (!v || !v.url) return '';
+    return '<br><a class="vid" href="' + v.url + '" target="_blank" rel="noopener">▶ Пересмотреть видео' + (v.t ? ' с ' + v.t : '') + '</a>';
+  }
+  var FLAG_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>';
+  function isFlag(c) { return !!(store.flags && store.flags[c.uid]); }
+  function flagBtn(c) {
+    var on = isFlag(c);
+    return '<button type="button" class="flagbtn' + (on ? ' on' : '') + '" data-flag="' + c.uid + '" aria-pressed="' + on + '">' +
+      FLAG_SVG + '<span>' + (on ? 'Отмечен как сложный' : 'Отметить как сложный') + '</span></button>';
+  }
+  function flagUids() {
+    var F = store.flags || {};
+    return ALL.filter(function (c) { return F[c.uid]; }).map(function (c) { return c.uid; });
+  }
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-flag]') : null;
+    if (!b) return;
+    var u = b.getAttribute('data-flag');
+    if (!store.flags) store.flags = {};
+    if (store.flags[u]) delete store.flags[u]; else store.flags[u] = Date.now();
+    save();
+    var on = !!store.flags[u];
+    Array.prototype.forEach.call(app.querySelectorAll('[data-flag="' + u + '"]'), function (x) {
+      x.classList.toggle('on', on); x.setAttribute('aria-pressed', on);
+      x.querySelector('span').textContent = on ? 'Отмечен как сложный' : 'Отметить как сложный';
+      x.classList.remove('bump'); void x.offsetWidth; x.classList.add('bump');
+    });
+  });
+  function readyMods() { return modules.filter(function (m) { return !!m.cards; }); }
+  function fmtDate(ts) {
+    var d = new Date(ts);
+    return ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2) + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+
+  /* ---------- Тема ---------- */
+  var root = document.documentElement;
+  function curTheme() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t;
+    return (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  var themeT = null;
+  function paintThemeBtn() {
+    var dark = curTheme() === 'dark', b = $('themeBtn');
+    b.innerHTML = dark ? SUN : MOON;
+    b.setAttribute('aria-label', dark ? 'Включить светлую тему' : 'Включить тёмную тему');
+    b.title = dark ? 'Светлая тема' : 'Тёмная тема';
+  }
+  $('themeBtn').addEventListener('click', function () {
+    var t = curTheme() === 'dark' ? 'light' : 'dark';
+    root.classList.add('theming');
+    root.setAttribute('data-theme', t);
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+    paintThemeBtn();
+    var tb = $('themeBtn'); tb.classList.remove('spin'); void tb.offsetWidth; tb.classList.add('spin');
+    clearTimeout(themeT); themeT = setTimeout(function () { root.classList.remove('theming'); }, 450);
+  });
+  if (window.matchMedia) {
+    var mq = matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', paintThemeBtn);
+  }
+  paintThemeBtn();
+
+  /* ---------- Навигация ---------- */
+  var timerId = null;
+  function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+  function setBack(v) { stopTimer(); $('toMenu').classList.toggle('hide', !v); }
+  $('toMenu').addEventListener('click', goMenu);
+  $('searchBtn').addEventListener('click', function () { toTop(); showGlossary(); });
+  $('setBtn').addEventListener('click', function () { toTop(); showSettings(); });
+  function goMenu() { navDir = 'back'; toTop(); showMenu(); }
+
+  /* ---------- Анимация смены экрана ---------- */
+  var reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var navDir = 'fwd', quiet = false, lastBar = 0;
+  function countUp(el) {
+    var tn = el.firstChild;
+    if (!tn || tn.nodeType !== 3) return;
+    var mm = /^(\d+)([\s\S]*)$/.exec(tn.nodeValue);
+    if (!mm) return;
+    var to = +mm[1], suf = mm[2];
+    if (!(to > 0)) return;
+    var t0 = null, dur = 700;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      tn.nodeValue = Math.round(to * e) + suf;
+      if (k < 1) requestAnimationFrame(step);
+    }
+    tn.nodeValue = '0' + suf;
+    requestAnimationFrame(step);
+  }
+  new MutationObserver(function () {
+    if (quiet) { quiet = false; }
+    else {
+      app.classList.remove('enter', 'back'); void app.offsetWidth;
+      app.classList.add('enter'); if (navDir === 'back') app.classList.add('back');
+    }
+    navDir = 'fwd';
+    var bar = app.querySelector('.bar');
+    if (bar) {
+      var tgt = parseFloat(bar.style.width) || 0;
+      if (!reduceMotion && tgt !== lastBar) {
+        bar.style.transition = 'none'; bar.style.width = lastBar + '%'; void bar.offsetWidth;
+        bar.style.transition = ''; requestAnimationFrame(function () { bar.style.width = tgt + '%'; });
+      }
+      lastBar = tgt;
+    } else { lastBar = 0; }
+    if (!reduceMotion) Array.prototype.forEach.call(app.querySelectorAll('.score, .big2 b'), countUp);
+  }).observe(app, { childList: true });
+
+  /* ---------- Сессии: модуль, весь банк, свой набор ---------- */
+  function moduleSession(m) { return { key: m.id, kind: 'module', sub: 'Модуль ' + m.n + '. ' + m.title, cards: m.cards }; }
+  function bankSession() { return { key: 'bank', kind: 'bank', sub: 'Весь банк заданий', cards: ALL }; }
+  function customSession() {
+    var st = stOf('custom');
+    return { key: 'custom', kind: 'custom', sub: 'Свой набор',
+      cards: (st.order || []).map(function (u) { return BY_UID[u]; }).filter(Boolean) };
+  }
+  function errorUids() {
+    var L = store.last || {};
+    return ALL.filter(function (c) { var l = L[c.uid]; return l && l.p < maxPts(c); }).map(function (c) { return c.uid; });
+  }
+  function errorsSession() {
+    var st = stOf('errors');
+    return { key: 'errors', kind: 'errors', sub: 'Работа над ошибками',
+      cards: (st.order || []).map(function (u) { return BY_UID[u]; }).filter(Boolean) };
+  }
+  function startErrors() {
+    store.errors = { results: {}, finished: false, order: errorUids() };
+    save(); openSession(errorsSession());
+  }
+  function flaggedSession() {
+    var st = stOf('flagged');
+    return { key: 'flagged', kind: 'flagged', sub: 'Отмеченные вопросы',
+      cards: (st.order || []).map(function (u) { return BY_UID[u]; }).filter(Boolean) };
+  }
+  function startFlagged() {
+    store.flagged = { results: {}, finished: false, order: flagUids() };
+    save(); openSession(flaggedSession());
+  }
+  function openSession(sess) { S = sess; cards = sess.cards; state = stOf(sess.key); toTop(); render(); }
+
+  function doneCount(sess) {
+    var st = stOf(sess.key);
+    return sess.cards.filter(function (c) { return c.uid in st.results; }).length;
+  }
+  function statusOf(sess) {
+    var st = stOf(sess.key), n = sess.cards.length, done = doneCount(sess);
+    if (n && done === n) {
+      var got = sess.cards.reduce(function (s, c) { return s + (st.results[c.uid] || 0); }, 0);
+      return 'Результат: ' + got + ' из ' + totalOf(sess.cards);
+    }
+    if (done > 0) return 'Выполнено ' + done + ' из ' + n;
+    return nTasks(n);
+  }
+
+  function currentIndex() {
+    for (var i = 0; i < cards.length; i++) { if (!(cards[i].uid in state.results)) return i; }
+    return -1;
+  }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function mast(sub) {
+    return '<header class="mast"><h1 class="mast-title">Курс Опермен</h1><p class="mast-sub">' + sub + '</p></header>';
+  }
+  function kindLabel(c) {
+    var k = KIND_NAME[c.kind] || '';
+    return S.kind === 'module' ? k : k + ' · Модуль ' + c.mod.n;
+  }
+  function head(i) {
+    var pct = Math.round(i / cards.length * 100);
+    var started = Object.keys(state.results).length > 0;
+    var resume = started
+      ? '<p class="resume">Прогресс сохраняется на этом устройстве. <button class="linklike" id="restart" type="button">Начать сначала</button></p>'
+      : '';
+    return mast(S.sub) +
+      '<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="' + cards.length + '" aria-valuenow="' + i + '"><div class="bar" style="width:' + pct + '%"></div></div>' +
+      '<p class="count">Задание ' + (i + 1) + ' из ' + cards.length + '</p>' + resume;
+  }
+  function bindRestart() {
+    var r = $('restart');
+    if (!r) return;
+    var armed = false;
+    r.addEventListener('click', function () {
+      if (!armed) { armed = true; r.textContent = 'Сбросить прогресс? Нажмите ещё раз'; return; }
+      resetAll();
+    });
+  }
+  function resetAll() {
+    if (S.kind === 'errors') { startErrors(); return; }
+    if (S.kind === 'flagged') { startFlagged(); return; }
+    if (S.kind === 'today') { startToday(); return; }
+    state.results = {}; state.finished = false;
+    if (S.kind === 'custom' && store.customPick && store.customPick.shuffle) shuffle(state.order);
+    save(); S = S.kind === 'custom' ? customSession() : S; cards = S.cards; toTop(); render();
+  }
+  function nextButton(last) {
+    return '<button class="primary" id="next" type="button">' + (last ? 'Показать результат' : 'Дальше') + '</button>';
+  }
+  function bindNext() {
+    var n = $('next');
+    if (n) n.addEventListener('click', function () { toTop(); render(); });
+  }
+
+  /* ---------- Тест ---------- */
+  function showTest(c, i) {
+    var opts = shuffle(c.opts.map(function (o) { return { t: o[0], ok: o[1] }; }));
+    var last = i === cards.length - 1;
+    app.innerHTML = head(i) +
+      '<section class="card"><p class="kind">' + kindLabel(c) + '</p><h2 class="q">' + c.q + '</h2>' + toolsRow(c) +
+      '<div>' + opts.map(function (o, k) { return '<button type="button" class="opt" data-k="' + k + '"><span class="kbd">' + (k + 1) + '</span><span class="ot">' + o.t + '</span></button>'; }).join('') + '</div>' +
+      '<div id="fb" aria-live="polite"></div></section>';
+    bindRestart();
+    var answered = false;
+    var btns = Array.prototype.slice.call(app.querySelectorAll('.opt'));
+    btns.forEach(function (b, k) {
+      b.addEventListener('click', function () {
+        if (answered) return;
+        answered = true;
+        var ok = opts[k].ok;
+        btns.forEach(function (bb, kk) {
+          bb.disabled = true;
+          if (opts[kk].ok) {
+            bb.classList.add('correct');
+            bb.insertAdjacentHTML('beforeend', '<span class="tag">' + (kk === k ? 'Верно' : 'Правильный ответ') + '</span>');
+          } else if (kk === k) {
+            bb.classList.add('wrong');
+            bb.insertAdjacentHTML('beforeend', '<span class="tag">Ваш ответ</span>');
+          } else { bb.classList.add('dim'); }
+        });
+        record(c, ok ? 1 : 0);
+        $('fb').innerHTML = '<div class="fb ' + (ok ? 'ok' : 'bad') + '"><strong>' + (ok ? 'Верно.' : 'Неверно.') + '</strong> ' + linkTerms(c.exp) + (ok ? '' : vidHtml(c)) + '</div>' + nextButton(last);
+        bindNext(); $('next').focus();
+      });
+    });
+  }
+
+  /* ---------- Сопоставление ---------- */
+  function showMatch(c, i) {
+    var last = i === cards.length - 1;
+    app.innerHTML = head(i) +
+      '<section class="card"><p class="kind">' + kindLabel(c) + '</p><h2 class="q">' + c.q + '</h2>' + toolsRow(c) +
+      c.rows.map(function (r, k) {
+        return '<div class="row" id="row' + k + '"><label for="s' + k + '">' + r[0] + '</label>' +
+          '<select id="s' + k + '"><option value="">Выберите вариант</option>' +
+          c.choices.map(function (x) { return '<option value="' + x + '">' + x + '</option>'; }).join('') +
+          '</select><div class="rowfb"></div></div>';
+      }).join('') +
+      '<button class="primary" id="check" type="button" disabled>Проверить</button>' +
+      '<div id="fb" aria-live="polite"></div></section>';
+    bindRestart();
+    var selects = c.rows.map(function (r, k) { return $('s' + k); });
+    function allFilled() { return selects.every(function (s) { return s.value !== ''; }); }
+    selects.forEach(function (s) { s.addEventListener('change', function () { $('check').disabled = !allFilled(); }); });
+    $('check').addEventListener('click', function () {
+      var pts = 0;
+      c.rows.forEach(function (r, k) {
+        var row = $('row' + k), s = selects[k], ok = s.value === r[1];
+        s.disabled = true;
+        row.classList.add(ok ? 'ok' : 'bad');
+        row.querySelector('.rowfb').textContent = ok ? 'Верно' : 'Неверно. Правильный ответ: ' + r[1];
+        if (ok) pts++;
+      });
+      record(c, pts);
+      $('check').style.display = 'none';
+      $('fb').innerHTML = '<div class="fb ' + (pts === c.rows.length ? 'ok' : 'bad') + '"><strong>Результат: ' + pts + ' из ' + c.rows.length + '.</strong> ' + linkTerms(c.exp) + (pts === c.rows.length ? '' : vidHtml(c)) + '</div>' + nextButton(last);
+      bindNext(); $('next').focus();
+    });
+  }
+
+  /* ---------- Кейс ---------- */
+  function showCase(c, i) {
+    var last = i === cards.length - 1;
+    app.innerHTML = head(i) +
+      '<section class="card"><p class="kind">' + kindLabel(c) + '</p><h2 class="q">' + c.q + '</h2>' + toolsRow(c) + '<p class="lead">' + c.lead + '</p>' +
+      c.fields.map(function (f) {
+        return '<div class="field"><label for="f_' + f.id + '"><strong>' + f.label + '</strong><span class="hint">' + f.hint + '</span></label>' +
+          '<textarea id="f_' + f.id + '"></textarea></div>';
+      }).join('') +
+      '<button class="primary" id="show" type="button" disabled>Показать образец</button>' +
+      '<div id="after" aria-live="polite"></div></section>';
+    bindRestart();
+    var areas = c.fields.map(function (f) { return $('f_' + f.id); });
+    function filled() { return areas.every(function (a) { return a.value.trim().length >= 5; }); }
+    areas.forEach(function (a) { a.addEventListener('input', function () { $('show').disabled = !filled(); }); });
+    $('show').addEventListener('click', function () {
+      areas.forEach(function (a) { a.readOnly = true; });
+      $('show').style.display = 'none';
+      $('after').innerHTML =
+        '<div class="model"><h3>Образец</h3>' +
+        c.fields.map(function (f) { return '<p><strong>' + f.label + '.</strong> ' + linkTerms(f.model) + '</p>'; }).join('') +
+        '<p>Образец показывает один из возможных вариантов. Ваши примеры могут отличаться, важно, чтобы они были по сути верными.</p></div>' +
+        caseAiHtml() +
+        '<fieldset><legend>Сверьтесь с образцом и отметьте, что у вас есть</legend>' +
+        c.checks.map(function (t, k) { return '<label class="check"><input type="checkbox" data-k="' + k + '"><span>' + t + '</span></label>'; }).join('') +
+        '</fieldset><button class="primary" id="finish" type="button">' + (last ? 'Показать результат' : 'Дальше') + '</button>';
+      $('finish').addEventListener('click', function () {
+        record(c, app.querySelectorAll('input[type=checkbox]:checked').length);
+        toTop(); render();
+      });
+      bindCaseAi(c, areas);
+      $('after').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  /* ---------- Результат ---------- */
+  function partOf(c) {
+    if (S.kind !== 'module') return 'Модуль ' + c.mod.n + '. ' + c.mod.title;
+    if (c.kind === 'test') return 'Тест';
+    if (c.kind === 'case') return 'Кейс';
+    if (c.kind === 'branch') return 'Ситуация';
+    return c.topic;
+  }
+  function showResult() {
+    state.finished = true; save();
+    var TOTAL = totalOf(cards);
+    var got = cards.reduce(function (s, c) { return s + (state.results[c.uid] || 0); }, 0);
+    var pct = TOTAL ? Math.round(got / TOTAL * 100) : 0;
+    var what = S.kind === 'module' ? 'Модуль усвоен, можно переходить к следующему.' : 'Материал усвоен.';
+    var verdict = pct >= 85 ? 'Отлично. ' + what
+      : pct >= 60 ? 'Хорошо, но есть что повторить. Список ниже.'
+      : (S.kind === 'module' ? 'Стоит пересмотреть видео модуля и пройти тренажёр ещё раз.' : 'Стоит пересмотреть видео по темам из списка и пройти ещё раз.');
+    var parts = [], byPart = {};
+    cards.forEach(function (c) {
+      var p = partOf(c);
+      if (!byPart[p]) { byPart[p] = [0, 0]; parts.push(p); }
+      byPart[p][0] += state.results[c.uid] || 0;
+      byPart[p][1] += maxPts(c);
+    });
+    var todo = [];
+    cards.forEach(function (c) {
+      if ((state.results[c.uid] || 0) < maxPts(c)) todo.push((S.kind === 'module' ? '' : 'М' + c.mod.n + '. ') + c.topic + vidHtml(c));
+    });
+    if (S.kind === 'errors') {
+      var fixed = cards.filter(function (c) { return (state.results[c.uid] || 0) === maxPts(c); }).length;
+      verdict = fixed === cards.length ? 'Все ошибки исправлены.' : 'Исправлено ' + fixed + ' из ' + nTasks(cards.length) + '. Оставшиеся задания снова попадут в работу над ошибками.';
+    }
+    setBack(true);
+    app.innerHTML = mast(S.sub + '. Итог') +
+      '<section class="card"><p class="score">' + got + ' <small>из ' + TOTAL + '</small></p>' +
+      '<p class="pct">' + pct + '%</p><p class="lead"><strong>' + verdict + '</strong></p>' +
+      '<ul class="parts">' + parts.map(function (p) {
+        return '<li><span>' + p + '</span><span>' + byPart[p][0] + ' из ' + byPart[p][1] + '</span></li>';
+      }).join('') + '</ul>' +
+      '<h2 class="q" style="margin-top:22px">Что повторить</h2>' +
+      (todo.length ? '<ul class="todo">' + todo.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>'
+        : '<p>Ошибок нет, повторять нечего.</p>') +
+      (S.kind === 'errors' && !errorUids().length ? '' : '<button class="primary" id="again" type="button">' + (S.kind === 'errors' ? 'Пройти оставшиеся ошибки' : 'Пройти заново') + '</button>') +
+      (S.kind === 'custom' ? '<button class="secondary" id="repick" type="button">Собрать другой набор</button>' : '') +
+      (S.kind === 'flagged' && cards.some(function (c) { return isFlag(c) && (state.results[c.uid] || 0) === maxPts(c); })
+        ? '<button class="secondary" id="unflagOk" type="button">Снять отметки с верно решённых</button>' : '') +
+      '<button class="secondary" id="menu2" type="button">В главное меню</button>' +
+      '<p class="note">Результат хранится только на этом устройстве.</p></section>';
+    if ($('again')) $('again').addEventListener('click', resetAll);
+    $('menu2').addEventListener('click', goMenu);
+    if ($('unflagOk')) $('unflagOk').addEventListener('click', function () {
+      var n = 0;
+      cards.forEach(function (c) { if (isFlag(c) && (state.results[c.uid] || 0) === maxPts(c)) { delete store.flags[c.uid]; n++; } });
+      save();
+      var b = $('unflagOk'); b.disabled = true; b.textContent = 'Отметки сняты: ' + n;
+    });
+    if ($('repick')) $('repick').addEventListener('click', function () { toTop(); showPicker(); });
+  }
+
+  /* ---------- Главное меню ---------- */
+  var IC_ERR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/><path d="M12 8v4.5M12 16h.01"/></svg>';
+  var IC_EXAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>';
+  var IC_CARDS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="14" height="13" rx="1.5"/><path d="M7 7V4.5A1.5 1.5 0 0 1 8.5 3h11A1.5 1.5 0 0 1 21 4.5v11a1.5 1.5 0 0 1-1.5 1.5H17"/></svg>';
+  var IC_SEARCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>';
+  var IC_STATS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M7 16v-5M12 16V6M17 16v-8"/></svg>';
+
+  function modeBtn(id, icon, title, status) {
+    return '<button type="button" class="mod" id="' + id + '"><span class="mod-ic">' + icon + '</span>' +
+      '<span class="mod-body"><span class="mod-title">' + title + '</span><span class="mod-status">' + status + '</span></span></button>';
+  }
+  function allTerms() {
+    var out = [];
+    modules.forEach(function (m) { (m.terms || []).forEach(function (t) { out.push({ k: m.id + '|' + t.t, t: t.t, d: t.d, mod: m }); }); });
+    return out;
+  }
+  function showMenu() {
+    S = null; setBack(false);
+    var cs = customSession(), cst = stOf('custom');
+    var customStatus = (cs.cards.length && !cst.finished && doneCount(cs) < cs.cards.length)
+      ? 'Текущий набор: выполнено ' + doneCount(cs) + ' из ' + cs.cards.length
+      : 'Выберите модули, темы и типы заданий';
+    var es = errorsSession(), ed = doneCount(es), errN = errorUids().length;
+    var errResume = es.cards.length && ed > 0 && ed < es.cards.length;
+    var errStatus = errResume ? 'Выполнено ' + ed + ' из ' + es.cards.length
+      : errN ? nTasks(errN) + ' с ошибками' : 'Ошибок пока нет';
+    var fs = flaggedSession(), fd = doneCount(fs), flN = flagUids().length;
+    var flResume = fs.cards.length && fd > 0 && fd < fs.cards.length;
+    var flStatus = flResume ? 'Выполнено ' + fd + ' из ' + fs.cards.length
+      : flN ? 'Отмечено ' + nTasks(flN) : 'Отмечайте сложные вопросы флажком';
+    var ex = store.exam;
+    var exStatus = (ex && !ex.done) ? 'Идёт экзамен: вопрос ' + Math.min(ex.i + 1, ex.order.length) + ' из ' + ex.order.length
+      : (store.examHist && store.examHist.length) ? 'Последний: ' + store.examHist[store.examHist.length - 1].pct + '%' : 'Без подсказок, на время';
+    var T = allTerms(), known = (store.flash && store.flash.known) || {};
+    var kn = T.filter(function (t) { return known[t.k]; }).length;
+    var L = store.last || {}, att = ALL.filter(function (c) { return c.uid in L; }).length;
+
+    app.innerHTML = mast('Тренажёр по операционному менеджменту') + todayPanel() +
+      '<h2 class="sec-title">Учиться</h2><div class="mods">' +
+      modeBtn('modeBank', IC_BANK, 'Весь банк подряд', ALL.length ? statusOf(bankSession()) + ' из всех модулей' : 'Пока нет заданий') +
+      modeBtn('modePick', IC_PICK, 'Свой набор', customStatus) +
+      modeBtn('modeCards', IC_CARDS, 'Карточки терминов', T.length ? 'Знаю ' + kn + ' из ' + T.length : 'Пока нет терминов') +
+      modeBtn('modeDict', IC_SEARCH, 'Словарь терминов', T.length ? 'Поиск по ' + T.length + ' ' + plural(T.length, 'термину', 'терминам', 'терминам') : 'Пока нет терминов') +
+      '</div>' +
+      '<h2 class="sec-title">Проверить себя</h2><div class="mods">' +
+      modeBtn('modeErr', IC_ERR, 'Работа над ошибками', errStatus) +
+      modeBtn('modeFlag', FLAG_SVG, 'Отмеченные вопросы', flStatus) +
+      modeBtn('modeExam', IC_EXAM, 'Экзамен', exStatus) +
+      modeBtn('modeStats', IC_STATS, 'Статистика', att ? 'Пройдено ' + att + ' из ' + nTasks(ALL.length) : 'Появится после первых ответов') +
+      '</div>' +
+      '<h2 class="sec-title">Модули</h2>' +
+      '<div class="mods">' + modules.map(function (m, k) {
+        var ready = !!m.cards;
+        return '<button type="button" class="mod" data-k="' + k + '"' + (ready ? '' : ' disabled') + '>' +
+          '<span class="mod-n">' + m.n + '</span>' +
+          '<span class="mod-body"><span class="mod-title">' + m.title + '</span>' +
+          '<span class="mod-status">' + (ready ? statusOf(moduleSession(m)) : 'Скоро') + '</span></span></button>';
+      }).join('') + '</div>' +
+      '<p class="note">Новые модули открываются по мере выхода видео. Прогресс сохраняется на этом устройстве.</p>' +
+      '<p class="note kbhint">С клавиатуры: 1–4 выбирают вариант, Enter переходит дальше. В карточках пробел переворачивает, стрелки отмечают «Знаю» и «Повторить».</p>';
+    $('modeBank').disabled = !ALL.length;
+    if ($('goToday')) $('goToday').addEventListener('click', function () {
+      var ts = todaySession(), td = doneCount(ts);
+      if (store.today && store.today.day === dayKey() && ts.cards.length && td > 0 && td < ts.cards.length) openSession(ts); else startToday();
+    });
+    $('modeCards').disabled = !T.length;
+    $('modeDict').disabled = !T.length;
+    $('modeDict').addEventListener('click', function () { toTop(); showGlossary(); });
+    $('modeErr').disabled = !errN && !errResume;
+    $('modeFlag').disabled = !flN && !flResume;
+    $('modeFlag').addEventListener('click', function () { if (flResume) openSession(fs); else startFlagged(); });
+    $('modeBank').addEventListener('click', function () { openSession(bankSession()); });
+    $('modePick').addEventListener('click', function () { toTop(); showPicker(); });
+    $('modeCards').addEventListener('click', function () { toTop(); showFlash(true); });
+    $('modeErr').addEventListener('click', function () { if (errResume) openSession(es); else startErrors(); });
+    $('modeExam').addEventListener('click', function () {
+      toTop();
+      if (store.exam && !store.exam.done) showExamQ(); else showExamSetup();
+    });
+    $('modeStats').addEventListener('click', function () { toTop(); showStats(); });
+    Array.prototype.forEach.call(app.querySelectorAll('.mod[data-k]:not([disabled])'), function (b) {
+      b.addEventListener('click', function () { openSession(moduleSession(modules[+b.getAttribute('data-k')])); });
+    });
+  }
+
+  /* ---------- Экзамен ---------- */
+  function examPool(mods) {
+    return ALL.filter(function (c) { return (c.kind === 'test' || c.kind === 'match') && mods.indexOf(c.mod.id) > -1; });
+  }
+  function showExamSetup() {
+    S = null; setBack(true);
+    var ready = readyMods();
+    var cfg = store.examCfg || {};
+    var nSel = cfg.n == null ? 10 : cfg.n, tSel = cfg.min == null ? 20 : cfg.min;
+    var mods = cfg.mods || ready.map(function (m) { return m.id; });
+    function chip(name, type, val, label, on) {
+      return '<label class="chip"><input type="' + type + '" name="' + name + '" value="' + val + '"' + (on ? ' checked' : '') + '>' + label + '</label>';
+    }
+    var last = store.exam && store.exam.done;
+    app.innerHTML = mast('Экзамен') +
+      '<p class="lead">Вопросы идут без подсказок, правильные ответы и разбор появятся в конце. Кейсы в экзамен не входят: их вы проверяете сами по образцу.</p>' +
+      (last ? '<button class="secondary" id="lastRev" type="button" style="margin-top:0">Разбор последнего экзамена</button>' : '') +
+      '<h2 class="sec-title">Количество вопросов</h2><div class="chips">' +
+      chip('n', 'radio', 10, '10', nSel === 10) + chip('n', 'radio', 20, '20', nSel === 20) + chip('n', 'radio', 0, 'Все', nSel === 0) + '</div>' +
+      '<h2 class="sec-title">Время</h2><div class="chips">' +
+      chip('t', 'radio', 10, '10 мин', tSel === 10) + chip('t', 'radio', 20, '20 мин', tSel === 20) +
+      chip('t', 'radio', 30, '30 мин', tSel === 30) + chip('t', 'radio', 0, 'Без таймера', tSel === 0) + '</div>' +
+      '<h2 class="sec-title">Модули</h2><div class="chips">' +
+      ready.map(function (m) { return chip('m', 'checkbox', m.id, 'Модуль ' + m.n, mods.indexOf(m.id) > -1); }).join('') + '</div>' +
+      '<p class="note">Таймер идёт, даже если закрыть экзамен. Вернуться к нему можно из главного меню.</p>' +
+      '<div class="startbar"><p class="selcount" id="selcount" aria-live="polite"></p>' +
+      '<button class="primary" id="startExam" type="button">Начать экзамен</button></div>';
+    function val(name) { var e = app.querySelector('input[name=' + name + ']:checked'); return e ? +e.value : 0; }
+    function curMods() { return Array.prototype.map.call(app.querySelectorAll('input[name=m]:checked'), function (b) { return b.value; }); }
+    function refresh() {
+      var pool = examPool(curMods()).length, n = val('n') ? Math.min(val('n'), pool) : pool;
+      $('selcount').textContent = n ? 'Будет вопросов: ' + n + (val('t') ? ', время ' + val('t') + ' мин' : ', без таймера') : 'Нет вопросов для экзамена';
+      $('startExam').disabled = !n;
+      store.examCfg = { n: val('n'), min: val('t'), mods: curMods() }; save();
+    }
+    Array.prototype.forEach.call(app.querySelectorAll('.chips input'), function (b) { b.addEventListener('change', refresh); });
+    if ($('lastRev')) $('lastRev').addEventListener('click', function () { toTop(); showExamResult(); });
+    $('startExam').addEventListener('click', function () {
+      var pool = shuffle(examPool(curMods())), n = val('n') ? Math.min(val('n'), pool.length) : pool.length;
+      var now = Date.now();
+      store.exam = { order: pool.slice(0, n).map(function (c) { return c.uid; }), ans: {}, perm: {}, i: 0,
+        start: now, endAt: val('t') ? now + val('t') * 60000 : 0, done: false };
+      save(); toTop(); showExamQ();
+    });
+    refresh();
+  }
+
+  function tick() {
+    var ex = store.exam, el = $('timer');
+    if (!ex || ex.done || !ex.endAt || !el) return;
+    var left = Math.max(0, Math.round((ex.endAt - Date.now()) / 1000));
+    el.textContent = Math.floor(left / 60) + ':' + ('0' + left % 60).slice(-2);
+    el.classList.toggle('low', left <= 60);
+    if (left <= 0) finishExam(true);
+  }
+
+  function showExamQ() {
+    S = null; setBack(true);
+    var ex = store.exam;
+    if (ex.endAt && Date.now() >= ex.endAt) { finishExam(true); return; }
+    if (ex.i >= ex.order.length) { finishExam(false); return; }
+    var c = BY_UID[ex.order[ex.i]];
+    if (!c) { ex.i++; save(); showExamQ(); return; }
+    var N = ex.order.length, last = ex.i === N - 1;
+    var body = '';
+    if (c.kind === 'test') {
+      if (!ex.perm[c.uid]) { ex.perm[c.uid] = shuffle(c.opts.map(function (o, k) { return k; })); save(); }
+      body = ex.perm[c.uid].map(function (k, pos) {
+        return '<button type="button" class="opt' + (ex.ans[c.uid] === k ? ' sel' : '') + '" data-o="' + k + '" aria-pressed="' + (ex.ans[c.uid] === k) + '"><span class="kbd">' + (pos + 1) + '</span><span class="ot">' + c.opts[k][0] + '</span></button>';
+      }).join('');
+    } else {
+      var a = ex.ans[c.uid] || [];
+      body = c.rows.map(function (r, k) {
+        return '<div class="row"><label for="s' + k + '">' + r[0] + '</label><select id="s' + k + '" data-r="' + k + '"><option value="">Выберите вариант</option>' +
+          c.choices.map(function (x) { return '<option value="' + x + '"' + (a[k] === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div>';
+      }).join('');
+    }
+    app.innerHTML = mast('Экзамен') +
+      '<div class="exbar"><span>Вопрос ' + (ex.i + 1) + ' из ' + N + '</span>' + (ex.endAt ? '<span class="timer" id="timer" role="timer" aria-label="Осталось времени"></span>' : '') + '</div>' +
+      '<div class="prog"><div class="bar" style="width:' + Math.round(ex.i / N * 100) + '%"></div></div>' +
+      '<section class="card"><p class="kind">' + KIND_NAME[c.kind] + ' · Модуль ' + c.mod.n + '</p><h2 class="q">' + c.q + '</h2>' + toolsRow(c) + body +
+      '<button class="primary" id="exNext" type="button"></button>' +
+      '<p style="margin:10px 0 0;text-align:center"><button class="linklike" id="exEnd" type="button">Завершить экзамен досрочно</button></p></section>';
+    function answered() {
+      var v = ex.ans[c.uid];
+      return c.kind === 'test' ? v != null : !!(v && v.some(function (x) { return x; }));
+    }
+    function label() { $('exNext').textContent = last ? 'Завершить экзамен' : (answered() ? 'Дальше' : 'Пропустить'); }
+    if (c.kind === 'test') {
+      Array.prototype.forEach.call(app.querySelectorAll('.opt'), function (b) {
+        b.addEventListener('click', function () {
+          ex.ans[c.uid] = +b.getAttribute('data-o'); save();
+          Array.prototype.forEach.call(app.querySelectorAll('.opt'), function (x) {
+            var on = x === b; x.classList.toggle('sel', on); x.setAttribute('aria-pressed', on);
+          });
+          label();
+        });
+      });
+    } else {
+      Array.prototype.forEach.call(app.querySelectorAll('select'), function (s) {
+        s.addEventListener('change', function () {
+          var arr = ex.ans[c.uid] || []; arr[+s.getAttribute('data-r')] = s.value; ex.ans[c.uid] = arr; save(); label();
+        });
+      });
+    }
+    label();
+    $('exNext').addEventListener('click', function () { ex.i++; save(); toTop(); showExamQ(); });
+    var armed = false;
+    $('exEnd').addEventListener('click', function () {
+      if (!armed) { armed = true; $('exEnd').textContent = 'Точно завершить? Нажмите ещё раз'; return; }
+      finishExam(false);
+    });
+    if (ex.endAt) { tick(); timerId = setInterval(tick, 1000); }
+  }
+
+  function examPts(c, a) {
+    if (c.kind === 'test') return (a != null && c.opts[a] && c.opts[a][1]) ? 1 : 0;
+    a = a || [];
+    return c.rows.reduce(function (s, r, k) { return s + (a[k] === r[1] ? 1 : 0); }, 0);
+  }
+  function finishExam(timeout) {
+    stopTimer();
+    var ex = store.exam;
+    if (!ex || ex.done) { toTop(); showExamResult(); return; }
+    var got = 0, total = 0;
+    ex.order.forEach(function (u) {
+      var c = BY_UID[u]; if (!c) return;
+      var A = ex.ans[u], p = examPts(c, A); got += p; total += maxPts(c);
+      if (c.kind === 'test' ? A != null : !!(A && A.some(function (x) { return x; }))) recordLast(c, p);
+    });
+    ex.done = true; ex.timeout = !!timeout; ex.got = got; ex.total = total;
+    ex.finish = Math.min(Date.now(), ex.endAt || Infinity);
+    var pct = total ? Math.round(got / total * 100) : 0;
+    if (!store.examHist) store.examHist = [];
+    store.examHist.push({ at: ex.finish, got: got, total: total, pct: pct, n: ex.order.length });
+    if (store.examHist.length > 20) store.examHist.shift();
+    save(); toTop(); showExamResult();
+  }
+
+  function showExamResult() {
+    S = null; setBack(true);
+    var ex = store.exam;
+    var pct = ex.total ? Math.round(ex.got / ex.total * 100) : 0;
+    var mins = Math.max(1, Math.round((ex.finish - ex.start) / 60000));
+    var verdict = pct >= 85 ? 'Отлично, экзамен сдан уверенно.' : pct >= 60 ? 'Неплохо, но есть пробелы. Разбор ниже.' : 'Пока слабо. Разберите ошибки и пройдите работу над ошибками.';
+    var rev = ex.order.map(function (u, i) {
+      var c = BY_UID[u]; if (!c) return '';
+      var a = ex.ans[u], p = examPts(c, a), full = p === maxPts(c), detail = '';
+      if (c.kind === 'test') {
+        var right = c.opts.filter(function (o) { return o[1]; })[0][0];
+        detail = '<p>Ваш ответ: ' + (a != null ? c.opts[a][0] : '<span class="muted">нет ответа</span>') + '</p>' +
+          (full ? '' : '<p>Правильный ответ: <strong>' + right + '</strong></p>');
+      } else {
+        a = a || [];
+        detail = '<p>Верно ' + p + ' из ' + c.rows.length + '</p>' + c.rows.map(function (r, k) {
+          return a[k] === r[1] ? '' : '<p>' + r[0] + ': ' + (a[k] ? a[k] : 'нет ответа') + ' → <strong>' + r[1] + '</strong></p>';
+        }).join('');
+      }
+      return '<div class="rev"><p style="margin:0" class="' + (full ? 'st-ok' : 'st-bad') + '">' + (i + 1) + '. ' + (full ? 'Верно' : (p ? 'Частично' : 'Неверно')) + '</p>' +
+        '<h3>' + c.q + '</h3>' + detail + '<div class="qtools" style="margin:8px 0 0">' + flagBtn(c) + noteBtn(c) + '</div>' + noteBox(c) + (full ? '' : '<p class="muted">' + linkTerms(c.exp) + vidHtml(c) + '</p>') + '</div>';
+    }).join('');
+    app.innerHTML = mast('Экзамен. Итог') +
+      '<section class="card"><p class="score">' + ex.got + ' <small>из ' + ex.total + '</small></p>' +
+      '<p class="pct">' + pct + '% · ' + mins + ' мин' + (ex.timeout ? ' · время вышло' : '') + '</p>' +
+      '<p class="lead"><strong>' + verdict + '</strong></p>' +
+      '<button class="primary" id="newExam" type="button">Новый экзамен</button>' +
+      (errorUids().length ? '<button class="secondary" id="goErr" type="button">Работа над ошибками</button>' : '') +
+      '</section>' +
+      '<section class="card"><h2 class="q" style="margin:0">Разбор</h2>' + rev + '</section>';
+    $('newExam').addEventListener('click', function () { toTop(); showExamSetup(); });
+    if ($('goErr')) $('goErr').addEventListener('click', startErrors);
+  }
+
+  /* ---------- Карточки терминов ---------- */
+  var fq = [];
+  function showFlash(fresh) {
+    S = null; setBack(true);
+    if (!store.flash) store.flash = { known: {} };
+    var known = store.flash.known, T = allTerms();
+    if (fresh) fq = shuffle(T.filter(function (t) { return !known[t.k]; }));
+    var kn = T.filter(function (t) { return known[t.k]; }).length;
+    var head = mast('Карточки терминов') +
+      '<div class="prog"><div class="bar" style="width:' + Math.round(kn / T.length * 100) + '%"></div></div>' +
+      '<p class="count">Знаю ' + kn + ' из ' + T.length + (fq.length ? ' · осталось в колоде ' + fq.length : '') + '</p>';
+    if (!fq.length) {
+      app.innerHTML = head + '<section class="card"><h2 class="q">Все термины отмечены как известные</h2>' +
+        '<p class="lead">Можно пройти колоду заново, чтобы освежить определения.</p>' +
+        '<button class="primary" id="fReset" type="button">Пройти все карточки заново</button>' +
+        '<button class="secondary" id="fMenu" type="button">В главное меню</button></section>';
+      $('fReset').addEventListener('click', function () { store.flash.known = {}; save(); showFlash(true); });
+      $('fMenu').addEventListener('click', goMenu);
+      return;
+    }
+    var t = fq[0];
+    quiet = !fresh;
+    app.innerHTML = head +
+      '<button type="button" class="flash' + (fresh ? '' : ' deal') + '" id="fcard" aria-label="Перевернуть карточку">' +
+      '<span class="flip-inner">' +
+      '<span class="face"><span class="kind" style="margin:0">Модуль ' + t.mod.n + '</span><span class="ft">' + t.t + '</span><span class="fh">Вспомните определение и нажмите на карточку</span></span>' +
+      '<span class="face back" aria-hidden="true"><span class="kind" style="margin:0">' + t.t + '</span><span class="fd">' + t.d + '</span></span>' +
+      '</span></button>' +
+      '<div class="duo fbtns off" id="fbtns"><button class="secondary" id="fAgain" type="button" tabindex="-1">Ещё повторить</button><button class="primary" id="fKnow" type="button" style="margin-top:10px" tabindex="-1">Знаю</button></div>' +
+      (kn ? '<p style="margin-top:14px"><button class="linklike" id="fClear" type="button">Сбросить отметки «Знаю»</button></p>' : '');
+    var card = $('fcard'), btns = $('fbtns'), faces = card.querySelectorAll('.face'), busy = false;
+    function setFlip(on) {
+      card.classList.toggle('flipped', on);
+      faces[0].setAttribute('aria-hidden', on); faces[1].setAttribute('aria-hidden', !on);
+      btns.classList.toggle('off', !on);
+      $('fAgain').tabIndex = on ? 0 : -1; $('fKnow').tabIndex = on ? 0 : -1;
+    }
+    card.addEventListener('click', function () { if (!busy) setFlip(!card.classList.contains('flipped')); });
+    function next(cls, fn) {
+      if (busy) return; busy = true; fn(); save();
+      if (reduceMotion) { showFlash(false); return; }
+      btns.classList.add('off'); card.classList.add(cls);
+      setTimeout(function () { showFlash(false); }, 280);
+    }
+    $('fKnow').addEventListener('click', function () { next('out-know', function () { known[t.k] = true; fq.shift(); }); });
+    $('fAgain').addEventListener('click', function () { next('out-again', function () { fq.push(fq.shift()); }); });
+    if ($('fClear')) {
+      var armed = false;
+      $('fClear').addEventListener('click', function () {
+        if (!armed) { armed = true; $('fClear').textContent = 'Сбросить? Нажмите ещё раз'; return; }
+        store.flash.known = {}; save(); showFlash(true);
+      });
+    }
+  }
+
+  /* ---------- Словарь и поиск терминов ---------- */
+  var glQuery = '';
+  function norm(x) { return String(x).toLowerCase().replace(/ё/g, 'е'); }
+  function esc(x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function hl(text, words) {
+    if (!words.length) return esc(text);
+    var n = norm(text), marks = [];
+    words.forEach(function (w) {
+      var from = 0, i;
+      while ((i = n.indexOf(w, from)) > -1) { marks.push([i, i + w.length]); from = i + w.length; }
+    });
+    if (!marks.length) return esc(text);
+    marks.sort(function (a, b) { return a[0] - b[0]; });
+    var out = '', pos = 0;
+    marks.forEach(function (m) {
+      if (m[1] <= pos) return;
+      var st = Math.max(m[0], pos);
+      out += esc(text.slice(pos, st)) + '<mark>' + esc(text.slice(st, m[1])) + '</mark>';
+      pos = m[1];
+    });
+    return out + esc(text.slice(pos));
+  }
+  function showGlossary() {
+    S = null; setBack(true);
+    var T = allTerms();
+    app.innerHTML = mast('Словарь терминов') +
+      '<div class="sbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>' +
+      '<input type="search" id="gq" placeholder="Например, муда или ресурсы" aria-label="Поиск термина" autocomplete="off" enterkeyhint="search">' +
+      '<button type="button" class="sclear" id="gclear" aria-label="Очистить поиск" hidden>×</button></div>' +
+      '<p class="gcount" id="gcount" aria-live="polite"></p>' +
+      '<section class="card" id="gl"></section>';
+    var inp = $('gq');
+    inp.value = glQuery;
+    function draw() {
+      glQuery = inp.value;
+      var words = norm(glQuery).split(/\s+/).filter(Boolean);
+      $('gclear').hidden = !glQuery;
+      var list = T.map(function (t) {
+        var nt = norm(t.t), nd = norm(t.d), score = 0;
+        for (var i = 0; i < words.length; i++) {
+          var w = words[i];
+          if (nt.indexOf(w) === 0) score += 3;
+          else if (nt.indexOf(w) > -1) score += 2;
+          else if (nd.indexOf(w) > -1) score += 1;
+          else return null;
+        }
+        return { t: t, s: score };
+      }).filter(Boolean);
+      if (words.length) list.sort(function (a, b) { return b.s - a.s; });
+      $('gcount').textContent = words.length
+        ? (list.length ? 'Найдено: ' + list.length : 'Ничего не найдено')
+        : 'Все термины: ' + T.length;
+      $('gl').style.display = list.length ? '' : 'none';
+      $('gl').innerHTML = list.map(function (o) {
+        var t = o.t;
+        var tc = termCards(t);
+        var notes = tc.filter(function (c) { return noteOf(c.uid); });
+        return '<div class="term"><span class="tm">Модуль ' + t.mod.n + '</span><h3>' + hl(t.t, words) + '</h3><p>' + hl(t.d, words) + '</p>' +
+          notes.map(function (c) { return '<p class="muted" style="font-size:15px">Моя заметка: ' + esc(noteOf(c.uid)) + '</p>'; }).join('') +
+          (tc.length ? '<button type="button" class="linklike gtasks" data-termtasks="' + esc(t.k) + '">Задания по термину · ' + tc.length + '</button>' : '') + '</div>';
+      }).join('');
+      if (words.length && !list.length) {
+        $('gcount').innerHTML = 'Ничего не найдено. Попробуйте часть слова, например «потер» вместо «потерями».';
+      }
+    }
+    var tmr = null;
+    inp.addEventListener('input', function () { clearTimeout(tmr); tmr = setTimeout(draw, 120); });
+    $('gclear').addEventListener('click', function () { inp.value = ''; draw(); inp.focus(); });
+    $('gl').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-termtasks]') : null;
+      if (!b) return;
+      var k = b.getAttribute('data-termtasks'), t = T.filter(function (x) { return x.k === k; })[0];
+      if (t) startTerm(t);
+    });
+    draw();
+    setTimeout(function () { try { inp.focus({ preventScroll: true }); } catch (e) { inp.focus(); } }, 50);
+  }
+
+  /* ---------- Интервальное повторение, дневная цель, готовность ---------- */
+  var DAY = 86400000, SRS_STEPS = [1, 3, 7, 14];
+  function dayKey(ts) {
+    var d = new Date(ts || Date.now());
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+  function startOfDay(ts) { var d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); }
+  function goalOf() { return (store.daily && store.daily.goal) || 10; }
+  function doneToday() { return (store.daily && store.daily.days && store.daily.days[dayKey()]) || 0; }
+  function streak() {
+    var days = (store.daily && store.daily.days) || {}, g = goalOf(), n = 0, d = new Date();
+    d.setHours(12, 0, 0, 0);
+    if ((days[dayKey(d.getTime())] || 0) < g) d.setDate(d.getDate() - 1);
+    while ((days[dayKey(d.getTime())] || 0) >= g) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function dueUids() {
+    var R = store.srs || {}, now = Date.now();
+    return ALL.filter(function (c) { return R[c.uid] && R[c.uid].due <= now; }).map(function (c) { return c.uid; });
+  }
+  function nextDue() {
+    var R = store.srs || {}, best = 0;
+    ALL.forEach(function (c) { var r = R[c.uid]; if (r && (!best || r.due < best)) best = r.due; });
+    return best;
+  }
+  function whenText(ts) {
+    var days = Math.round((startOfDay(ts) - startOfDay(Date.now())) / DAY);
+    if (days <= 0) return 'сегодня';
+    if (days === 1) return 'завтра';
+    if (days === 2) return 'послезавтра';
+    return 'через ' + days + ' ' + plural(days, 'день', 'дня', 'дней');
+  }
+  function readiness() {
+    if (!ALL.length) return 0;
+    var L = store.last || {}, now = Date.now(), sum = 0;
+    ALL.forEach(function (c) {
+      var l = L[c.uid]; if (!l) return;
+      var age = l.at ? (now - l.at) / DAY : 30;
+      var f = age <= 7 ? 1 : Math.max(0.6, 1 - 0.4 * (age - 7) / 23);
+      sum += Math.min(1, l.p / maxPts(c)) * f;
+    });
+    return Math.round(sum / ALL.length * 100);
+  }
+  function todaySession() {
+    var st = stOf('today');
+    return { key: 'today', kind: 'today', sub: 'Повторение на сегодня',
+      cards: (st.order || []).map(function (u) { return BY_UID[u]; }).filter(Boolean) };
+  }
+  function startToday() {
+    store.today = { results: {}, finished: false, order: dueUids(), day: dayKey() };
+    save(); openSession(todaySession());
+  }
+  var FLAME = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3.5-1.5 5-1.5 7.5 0 1.4 1 2.5 2.3 2.5 1.6 0 2.4-1.3 2.2-3.2C17.4 10.5 19 13 19 15.5 19 19.1 15.9 22 12 22s-7-2.9-7-6.5C5 10.6 10.4 7.6 12 2z"/></svg>';
+  function todayPanel() {
+    var g = goalOf(), d = doneToday(), st = streak(), due = dueUids().length;
+    var ts = todaySession(), td = doneCount(ts);
+    var tResume = store.today && store.today.day === dayKey() && ts.cards.length && td > 0 && td < ts.cards.length;
+    var nd = nextDue();
+    var act = tResume
+      ? '<button class="primary" id="goToday" type="button">Продолжить повторение · ' + td + ' из ' + ts.cards.length + '</button>'
+      : due ? '<button class="primary" id="goToday" type="button">Повторить на сегодня · ' + due + '</button>'
+      : '<p class="note">' + (nd ? 'Повторений на сегодня нет. Следующее ' + whenText(nd) + '.' : 'Здесь появятся вопросы для повторения через 1, 3, 7 и 14 дней после ошибки.') + '</p>';
+    return '<section class="card today"><div class="tgrid">' +
+      '<div><span class="ring" style="--p:' + Math.min(100, Math.round(d / g * 100)) + '"><b>' + d + '</b></span><span>из ' + g + ' сегодня</span></div>' +
+      '<div><span class="flame' + (st ? '' : ' off') + '">' + FLAME + '<b>' + st + '</b></span><span>' + plural(st, 'день', 'дня', 'дней') + ' подряд</span></div>' +
+      '<div><span class="gauge"><b>' + readiness() + '%</b></span><span>готовность к экзамену</span></div>' +
+      '</div>' + act + '</section>';
+  }
+
+  /* ---------- Заметки ---------- */
+  var NOTE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+  function noteOf(u) { return (store.notes && store.notes[u]) || ''; }
+  function noteBtn(c) {
+    var has = !!noteOf(c.uid);
+    return '<button type="button" class="flagbtn notebtn' + (has ? ' on' : '') + '" data-note="' + c.uid + '" aria-expanded="' + has + '">' +
+      NOTE_SVG + '<span>' + (has ? 'Моя заметка' : 'Заметка') + '</span></button>';
+  }
+  function noteBox(c) {
+    var t = noteOf(c.uid);
+    return '<div class="notebox" data-notebox="' + c.uid + '"' + (t ? '' : ' hidden') + '>' +
+      '<textarea data-notetext="' + c.uid + '" placeholder="Что здесь сложного, на что обратить внимание" aria-label="Моя заметка к вопросу">' + esc(t) + '</textarea>' +
+      '<span class="hint" data-notesaved="' + c.uid + '"></span></div>';
+  }
+  function toolsRow(c) { return '<div class="qtools">' + flagBtn(c) + noteBtn(c) + '</div>' + noteBox(c); }
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-note]') : null;
+    if (!b) return;
+    var u = b.getAttribute('data-note'), box = app.querySelector('[data-notebox="' + u + '"]');
+    if (!box) return;
+    box.hidden = !box.hidden;
+    b.setAttribute('aria-expanded', !box.hidden);
+    if (!box.hidden) box.querySelector('textarea').focus();
+  });
+  var noteT = null;
+  app.addEventListener('input', function (e) {
+    var ta = e.target;
+    if (!ta.getAttribute || !ta.hasAttribute('data-notetext')) return;
+    var u = ta.getAttribute('data-notetext');
+    clearTimeout(noteT);
+    noteT = setTimeout(function () {
+      if (!store.notes) store.notes = {};
+      var v = ta.value.trim();
+      if (v) store.notes[u] = ta.value; else delete store.notes[u];
+      save();
+      var hint = app.querySelector('[data-notesaved="' + u + '"]');
+      if (hint) hint.textContent = v ? 'Сохранено' : 'Заметка удалена';
+      Array.prototype.forEach.call(app.querySelectorAll('[data-note="' + u + '"]'), function (x) {
+        x.classList.toggle('on', !!v); x.querySelector('span').textContent = v ? 'Моя заметка' : 'Заметка';
+      });
+    }, 400);
+  });
+
+  /* ---------- Связь терминов и заданий ---------- */
+  function stem(w) { return w.length <= 5 ? w : w.slice(0, Math.max(5, w.length - 3)); }
+  function termAlts(t) {
+    var src = t.keys || (function () {
+      var parts = [t.t.replace(/\(.*?\)/g, '').trim()], m = t.t.match(/\(([^)]+)\)/);
+      if (m) parts.push(m[1]);
+      return parts;
+    })();
+    return src.map(function (p) { return norm(p).split(/[\s\-]+/).filter(Boolean).map(stem); }).filter(function (a) { return a.length; });
+  }
+  function reEsc(x) { return x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  var L_ = 'а-яёa-z0-9';
+  function altRe(stems, flags) {
+    var body = stems.map(function (s) { return reEsc(s).replace(/е/g, '[её]'); }).join('[' + L_ + ']*[\\s\\-]+');
+    return new RegExp('(^|[^' + L_ + '])(' + body + '[' + L_ + ']*)', flags || 'i');
+  }
+  function cardText(c) {
+    var parts = [c.q, c.topic, c.exp || '', c.lead || ''];
+    if (c.opts) c.opts.forEach(function (o) { parts.push(o[0]); });
+    if (c.rows) c.rows.forEach(function (r) { parts.push(r[0], r[1]); });
+    if (c.fields) c.fields.forEach(function (f) { parts.push(f.label, f.model); });
+    if (c.nodes) Object.keys(c.nodes).forEach(function (k) {
+      var n = c.nodes[k]; parts.push(n.text || '');
+      (n.choices || []).forEach(function (ch) { parts.push(ch.t, ch.fb || ''); });
+    });
+    return norm(parts.join(' \n '));
+  }
+  var TERM_CARDS = {};
+  function termCards(t) {
+    if (TERM_CARDS[t.k]) return TERM_CARDS[t.k];
+    var alts = termAlts(t), res;
+    if (t.tasks) res = t.tasks.map(function (id) { return BY_UID[t.mod.id + '.' + id] || BY_UID[id]; }).filter(Boolean);
+    else res = ALL.filter(function (c) {
+      var txt = cardText(c);
+      return alts.some(function (a) { return altRe(a).test(txt); });
+    });
+    return (TERM_CARDS[t.k] = res);
+  }
+  function linkTerms(text) {
+    if (!text) return '';
+    var T = allTerms().slice().sort(function (a, b) { return b.t.length - a.t.length; });
+    var ranges = [];
+    T.forEach(function (t) {
+      var hit = null;
+      termAlts(t).some(function (a) {
+        var m = altRe(a, 'i').exec(text);
+        if (m) { var st = m.index + m[1].length; hit = [st, st + m[2].length, t.k]; return true; }
+        return false;
+      });
+      if (hit && !ranges.some(function (r) { return hit[0] < r[1] && r[0] < hit[1]; })) ranges.push(hit);
+    });
+    ranges.sort(function (a, b) { return a[0] - b[0]; });
+    var out = '', pos = 0;
+    ranges.forEach(function (r) {
+      out += esc(text.slice(pos, r[0])) + '<button type="button" class="termlink" data-term="' + esc(r[2]) + '">' + esc(text.slice(r[0], r[1])) + '</button>';
+      pos = r[1];
+    });
+    return out + esc(text.slice(pos));
+  }
+  var sheetReturn = null;
+  function closeSheet() {
+    var w = document.querySelector('.sheet-wrap');
+    if (w) w.parentNode.removeChild(w);
+    if (sheetReturn && document.body.contains(sheetReturn)) sheetReturn.focus();
+    sheetReturn = null;
+  }
+  function openTerm(k, from) {
+    var t = allTerms().filter(function (x) { return x.k === k; })[0];
+    if (!t) return;
+    closeSheet(); sheetReturn = from || null;
+    var d = document.createElement('div');
+    d.className = 'sheet-wrap';
+    d.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><p class="kind">Модуль ' + t.mod.n + '</p>' +
+      '<h2 class="q" id="shT">' + esc(t.t) + '</h2><p>' + esc(t.d) + '</p>' +
+      '<button class="secondary" type="button" data-close>Понятно</button></div>';
+    document.body.appendChild(d);
+    d.addEventListener('click', function (e) { if (e.target === d || (e.target.closest && e.target.closest('[data-close]'))) closeSheet(); });
+    d.querySelector('[data-close]').focus();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('.termlink') : null;
+    if (b) { e.preventDefault(); openTerm(b.getAttribute('data-term'), b); }
+  });
+  function termSession() {
+    var st = stOf('term');
+    return { key: 'term', kind: 'term', sub: 'Задания по термину «' + (st.title || '') + '»',
+      cards: (st.order || []).map(function (u) { return BY_UID[u]; }).filter(Boolean) };
+  }
+  function startTerm(t) {
+    store.term = { results: {}, finished: false, order: termCards(t).map(function (c) { return c.uid; }), title: t.t };
+    save(); openSession(termSession());
+  }
+
+  /* ---------- Claude: объяснения и проверка кейсов ---------- */
+  var SAMPLE = null, DL = null, aiOff = false;
+  try {
+    if (window.claude && typeof window.claude.use === 'function') {
+      window.claude.use('sample').then(function (s) { SAMPLE = s; }, function () {});
+      window.claude.use('downloads').then(function (d) { DL = d; }, function () {});
+    }
+  } catch (e) { /* без Claude */ }
+  var SPARK = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>';
+  function aiReady() { return !!SAMPLE && !aiOff; }
+  var AI_RULES = 'Ты преподаватель курса по операционному менеджменту для бакалавров. Пиши по-русски, обращайся на «вы», простым языком. Без заголовков, без списков и без markdown, обычным текстом.';
+  function aiErrText(code) {
+    if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].indexOf(code) > -1) {
+      aiOff = true; return 'Объяснения от Claude недоступны в этом просмотре.';
+    }
+    if (code === 'rate_limited') return 'Слишком много запросов. Попробуйте чуть позже.';
+    if (code === 'session_expired') return 'Войдите в Claude заново и повторите.';
+    if (code === 'refused') return 'Claude не стал отвечать на этот запрос.';
+    return 'Не получилось получить ответ. Попробуйте ещё раз.';
+  }
+  function caseAiHtml() {
+    if (!aiReady()) return '';
+    return '<div class="aibox"><button type="button" class="aibtn" id="aiCase">' + SPARK + '<span>Проверить мой ответ с Claude</span></button>' +
+      '<div class="aiout" id="aiCaseOut" aria-live="polite"></div></div>';
+  }
+  function bindCaseAi(c, areas) {
+    var b = $('aiCase'); if (!b) return;
+    b.addEventListener('click', function () {
+      var out = $('aiCaseOut'), ctl = new AbortController();
+      b.hidden = true;
+      out.innerHTML = '<span class="muted">Claude проверяет ответ, это может занять до минуты…</span> <button type="button" class="linklike aistop">Остановить</button>';
+      out.querySelector('.aistop').addEventListener('click', function () { ctl.abort(); });
+      var prompt = AI_RULES + ' Проверь письменный ответ студента на кейс. Сравни с образцом по смыслу, а не дословно: примеры студента могут отличаться, если они по сути верны. ' +
+        'Верни только JSON вида {"checks": [true, false, ...], "comment": "..."}, где checks — выполнен ли каждый критерий по порядку (ровно ' + c.checks.length + ' значений), ' +
+        'comment — 3–5 предложений: что получилось, чего не хватает и как улучшить.\n\n' +
+        'Кейс: ' + c.q + '. ' + c.lead + '\n\nОтвет студента:\n' +
+        c.fields.map(function (f, k) { return f.label + ': ' + areas[k].value.trim(); }).join('\n') +
+        '\n\nОбразец:\n' + c.fields.map(function (f) { return f.label + ': ' + f.model; }).join('\n') +
+        '\n\nКритерии:\n' + c.checks.map(function (t, k) { return (k + 1) + '. ' + t; }).join('\n');
+      SAMPLE.json(prompt, { signal: ctl.signal }).then(function (r) {
+        var checks = (r && r.checks) || [];
+        Array.prototype.forEach.call(app.querySelectorAll('#after input[type=checkbox]'), function (cb, k) {
+          if (typeof checks[k] === 'boolean') cb.checked = checks[k];
+        });
+        var n = checks.filter(function (x) { return x === true; }).length;
+        out.textContent = 'Claude засчитал ' + n + ' из ' + c.checks.length + ' критериев и отметил их ниже. Вы можете поправить отметки.\n\n' + String((r && r.comment) || '');
+      }).catch(function (err) {
+        var code = err && err.code;
+        if (code === 'cancelled') { out.innerHTML = ''; b.hidden = false; return; }
+        out.textContent = code === 'invalid_json' ? 'Claude ответил в неожиданном формате. Попробуйте ещё раз.' : aiErrText(code);
+        if (!aiOff) b.hidden = false;
+      });
+    });
+  }
+
+  /* ---------- Ситуация с ветвлением ---------- */
+  function showBranch(c, i) {
+    var last = i === cards.length - 1, node = c.start, got = 0;
+    app.innerHTML = head(i) +
+      '<section class="card"><p class="kind">' + kindLabel(c) + '</p><h2 class="q">' + c.q + '</h2>' + toolsRow(c) +
+      '<p class="lead">' + c.lead + '</p><div id="br"></div></section>';
+    bindRestart();
+    function best(n) { return Math.max.apply(null, n.choices.map(function (x) { return x.pts; })); }
+    function step() {
+      var n = c.nodes[node], br = $('br');
+      if (!n || n.end) {
+        record(c, got);
+        br.insertAdjacentHTML('beforeend', '<div class="fb ' + (got === c.max ? 'ok' : got ? 'mid' : 'bad') + '"><strong>Итог: ' + got + ' из ' + c.max + '.</strong> ' + linkTerms((n && n.text) || '') + '</div>' + nextButton(last));
+        bindNext(); $('next').focus(); return;
+      }
+      br.insertAdjacentHTML('beforeend', '<div class="bstep"><p class="bsit">' + n.text + '</p>' +
+        n.choices.map(function (ch, k) {
+          return '<button type="button" class="opt" data-c="' + k + '"><span class="kbd">' + (k + 1) + '</span><span class="ot">' + ch.t + '</span></button>';
+        }).join('') + '<div class="bfb"></div></div>');
+      var el = br.lastElementChild, bs = Array.prototype.slice.call(el.querySelectorAll('.opt')), mx = best(n);
+      bs.forEach(function (b, k) {
+        b.addEventListener('click', function () {
+          var ch = n.choices[k], cls = ch.pts >= mx ? 'ok' : ch.pts > 0 ? 'mid' : 'bad';
+          got += ch.pts;
+          bs.forEach(function (x, kk) {
+            x.disabled = true;
+            if (kk === k) {
+              x.classList.add(cls === 'ok' ? 'correct' : cls === 'bad' ? 'wrong' : 'mid');
+              x.insertAdjacentHTML('beforeend', '<span class="tag">' + (cls === 'ok' ? 'Лучшее решение' : cls === 'mid' ? 'Можно лучше' : 'Неудачно') + '</span>');
+            } else x.classList.add('dim');
+          });
+          var nextNode = c.nodes[ch.to];
+          el.querySelector('.bfb').innerHTML = '<div class="fb ' + cls + '">' + linkTerms(ch.fb) + '</div>' +
+            '<button class="primary" id="bNext" type="button">' + (!nextNode || nextNode.end ? 'Подвести итог' : 'Что было дальше') + '</button>';
+          var nb = $('bNext');
+          nb.focus();
+          nb.addEventListener('click', function () {
+            nb.parentNode.removeChild(nb);
+            node = ch.to; step();
+            var steps = $('br').children, lastEl = steps[steps.length - 1];
+            if (lastEl && lastEl.scrollIntoView) lastEl.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+          });
+        });
+      });
+    }
+    step();
+  }
+
+  /* ---------- Клавиатура ---------- */
+  document.addEventListener('keydown', function (e) {
+    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (document.querySelector('.sheet-wrap')) { if (e.key === 'Escape') closeSheet(); return; }
+    var tn = e.target && e.target.tagName;
+    if (tn === 'INPUT' || tn === 'TEXTAREA' || tn === 'SELECT') return;
+    var fc = $('fcard');
+    if (fc) {
+      var open = $('fbtns') && !$('fbtns').classList.contains('off');
+      if (e.key === ' ' && tn !== 'BUTTON') { e.preventDefault(); fc.click(); return; }
+      if (e.key === 'ArrowRight' && open) { $('fKnow').click(); return; }
+      if (e.key === 'ArrowLeft' && open) { $('fAgain').click(); return; }
+      return;
+    }
+    if (/^[1-9]$/.test(e.key)) {
+      var steps = app.querySelectorAll('.bstep');
+      var scope = steps.length ? steps[steps.length - 1] : app;
+      var b = scope.querySelectorAll('.opt:not(:disabled)')[+e.key - 1];
+      if (b) { e.preventDefault(); b.click(); }
+      return;
+    }
+    if (e.key === 'Enter') {
+      if (tn === 'BUTTON' || tn === 'A') return;
+      var ids = ['next', 'bNext', 'check', 'exNext', 'finish'];
+      for (var i = 0; i < ids.length; i++) {
+        var x = $(ids[i]);
+        if (x && !x.disabled && x.offsetParent !== null && x.style.display !== 'none') { e.preventDefault(); x.click(); return; }
+      }
+    }
+  });
+
+  /* ---------- Настройки и перенос прогресса ---------- */
+  function applyFs(v) {
+    if (v === 'l' || v === 'xl') root.setAttribute('data-fs', v); else root.removeAttribute('data-fs');
+  }
+  function exportCode() {
+    var json = JSON.stringify({ app: 'opermen', v: 1, at: Date.now(), store: store });
+    return 'OPM1.' + btoa(unescape(encodeURIComponent(json)));
+  }
+  function parseImport(text) {
+    text = String(text || '').trim();
+    var json = text;
+    if (text.indexOf('OPM1.') === 0) json = decodeURIComponent(escape(atob(text.slice(5).replace(/\s+/g, ''))));
+    var o = JSON.parse(json);
+    if (!o || o.app !== 'opermen' || !o.store || typeof o.store !== 'object') throw new Error('bad');
+    return o.store;
+  }
+  function showSettings() {
+    S = null; setBack(true);
+    var th = root.getAttribute('data-theme') || 'auto', fs = root.getAttribute('data-fs') || 'n', g = goalOf();
+    function chip(name, val, label, on) {
+      return '<label class="chip"><input type="radio" name="' + name + '" value="' + val + '"' + (on ? ' checked' : '') + '>' + label + '</label>';
+    }
+    app.innerHTML = mast('Настройки') + accessInfoHtml() +
+      '<h2 class="sec-title">Тема</h2><div class="chips">' +
+      chip('th', 'light', 'Светлая', th === 'light') + chip('th', 'dark', 'Тёмная', th === 'dark') + chip('th', 'auto', 'Как в системе', th === 'auto') + '</div>' +
+      '<h2 class="sec-title">Размер текста</h2><div class="chips">' +
+      chip('fs', 'n', 'Обычный', fs === 'n') + chip('fs', 'l', 'Крупный', fs === 'l') + chip('fs', 'xl', 'Очень крупный', fs === 'xl') + '</div>' +
+      '<h2 class="sec-title">Дневная цель</h2><div class="chips">' +
+      [5, 10, 20, 30].map(function (n) { return chip('goal', n, n + ' ' + plural(n, 'задание', 'задания', 'заданий'), g === n); }).join('') + '</div>' +
+      '<p class="note" style="margin-top:8px">День засчитывается в серию, когда выполнена цель.</p>' +
+      '<h2 class="sec-title">Перенос прогресса</h2>' +
+      '<section class="card" style="margin-top:8px"><p style="margin:0">Чтобы продолжить на другом устройстве, скопируйте код здесь и вставьте его там в поле ниже. Код содержит весь прогресс, отметки и заметки.</p>' +
+      '<button class="secondary" id="mkCode" type="button">Показать код</button>' +
+      '<div id="codeArea"></div>' +
+      (DL ? '<button class="secondary" id="dlFile" type="button">Скачать файл с прогрессом</button>' : '') +
+      '<p id="dlMsg" class="note" aria-live="polite"></p>' +
+      '<label for="impCode" style="display:block;margin-top:18px;font-weight:700">Загрузить прогресс</label>' +
+      '<textarea id="impCode" class="codebox" placeholder="Вставьте код, начинается с OPM1."></textarea>' +
+      '<button class="primary" id="impBtn" type="button" disabled>Загрузить из кода</button>' +
+      '<label class="secondary" style="text-align:center;line-height:30px">Выбрать файл<input type="file" id="impFile" accept=".json,.txt,application/json,text/plain" style="position:absolute;opacity:0;width:1px;height:1px"></label>' +
+      '<p id="impMsg" aria-live="polite"></p></section>' +
+      '<h2 class="sec-title">Сброс</h2>' +
+      '<p><button class="linklike" id="resetAllData" type="button">Удалить весь прогресс на этом устройстве</button></p>';
+
+    Array.prototype.forEach.call(app.querySelectorAll('input[name=th]'), function (r) {
+      r.addEventListener('change', function () {
+        root.classList.add('theming');
+        if (r.value === 'auto') { root.removeAttribute('data-theme'); try { localStorage.removeItem(THEME_KEY); } catch (e) {} }
+        else { root.setAttribute('data-theme', r.value); try { localStorage.setItem(THEME_KEY, r.value); } catch (e) {} }
+        paintThemeBtn();
+        setTimeout(function () { root.classList.remove('theming'); }, 450);
+      });
+    });
+    Array.prototype.forEach.call(app.querySelectorAll('input[name=fs]'), function (r) {
+      r.addEventListener('change', function () { applyFs(r.value); try { localStorage.setItem('opermen_fs', r.value); } catch (e) {} });
+    });
+    Array.prototype.forEach.call(app.querySelectorAll('input[name=goal]'), function (r) {
+      r.addEventListener('change', function () { if (!store.daily) store.daily = { goal: 10, days: {} }; store.daily.goal = +r.value; save(); });
+    });
+    $('mkCode').addEventListener('click', function () {
+      var code = exportCode();
+      $('codeArea').innerHTML = '<textarea class="codebox" id="codeOut" readonly aria-label="Код прогресса"></textarea>' +
+        '<button class="primary" id="cpCode" type="button">Скопировать код</button>';
+      $('codeOut').value = code;
+      $('cpCode').addEventListener('click', function () {
+        var ta = $('codeOut'), btn = $('cpCode');
+        function done(ok) { btn.textContent = ok ? 'Скопировано' : 'Выделите код и скопируйте вручную'; }
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(function () { done(true); }, function () {
+          ta.select(); try { done(document.execCommand('copy')); } catch (e) { done(false); }
+        });
+        else { ta.select(); try { done(document.execCommand('copy')); } catch (e) { done(false); } }
+      });
+    });
+    if ($('dlFile')) $('dlFile').addEventListener('click', function () {
+      var json = JSON.stringify({ app: 'opermen', v: 1, at: Date.now(), store: store });
+      DL.save({ filename: 'opermen-progress-' + dayKey() + '.json', data: json })
+        .then(function () { $('dlMsg').textContent = 'Файл сохранён.'; })
+        .catch(function (e) { $('dlMsg').textContent = e && e.code === 'declined' ? '' : 'Не удалось сохранить файл.'; });
+    });
+    var pending = null, armed = false;
+    function setPending(st, msg) {
+      pending = st; armed = false;
+      $('impBtn').disabled = !st;
+      $('impBtn').textContent = 'Загрузить из кода';
+      $('impMsg').className = st ? '' : 'errmsg';
+      $('impMsg').textContent = msg || '';
+    }
+    function tryParse(text) {
+      try { var st = parseImport(text); setPending(st, ''); return true; }
+      catch (e) { setPending(null, text.trim() ? 'Код не распознан. Проверьте, что он скопирован полностью.' : ''); return false; }
+    }
+    $('impCode').addEventListener('input', function () { tryParse($('impCode').value); });
+    $('impFile').addEventListener('change', function () {
+      var f = this.files && this.files[0]; if (!f) return;
+      var rd = new FileReader();
+      rd.onload = function () { if (tryParse(String(rd.result))) { $('impCode').value = '(файл ' + f.name + ')'; $('impMsg').className = ''; $('impMsg').textContent = 'Файл прочитан. Нажмите «Загрузить», чтобы заменить прогресс.'; } };
+      rd.readAsText(f);
+    });
+    $('impBtn').addEventListener('click', function () {
+      if (!pending) return;
+      if (!armed) { armed = true; $('impBtn').textContent = 'Текущий прогресс будет заменён. Нажмите ещё раз'; return; }
+      store = pending; save(); TERM_CARDS = {};
+      $('impMsg').className = 'okmsg'; $('impMsg').textContent = 'Прогресс загружен.';
+      $('impBtn').disabled = true; $('impBtn').textContent = 'Готово';
+    });
+    var rArmed = false;
+    $('resetAllData').addEventListener('click', function () {
+      if (!rArmed) { rArmed = true; $('resetAllData').textContent = 'Удалить всё без возможности восстановить? Нажмите ещё раз'; return; }
+      store = {}; save(); goMenu();
+    });
+  }
+
+  /* ---------- Доступ по персональной ссылке (Supabase) ---------- */
+  var CODE_KEY = 'opermen_code', DEV_KEY = 'opermen_device', OK_KEY = 'opermen_access_ok';
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  function accessOn() { return !!(ACCESS.url && ACCESS.key); }
+  function deviceId() {
+    var d = lsGet(DEV_KEY);
+    if (!d || d.length < 8) {
+      d = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      lsSet(DEV_KEY, d);
+    }
+    return d;
+  }
+  function rpc(fn, args) {
+    var h = { 'Content-Type': 'application/json', 'apikey': ACCESS.key };
+    if (/^eyJ/.test(ACCESS.key)) h.Authorization = 'Bearer ' + ACCESS.key;
+    return fetch(ACCESS.url.replace(/\/+$/, '') + '/rest/v1/rpc/' + fn, { method: 'POST', headers: h, body: JSON.stringify(args) })
+      .then(function (r) {
+        return r.text().then(function (t) {
+          var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {}
+          if (!r.ok) { var err = new Error((d && d.message) || ('HTTP ' + r.status)); err.status = r.status; err.data = d; throw err; }
+          return d;
+        });
+      });
+  }
+  function setGated(on) { document.body.classList.toggle('gated', !!on); }
+  var studentName = '';
+
+  function boot() {
+    var params = new URLSearchParams(location.search);
+    if (params.has('admin')) { setGated(true); showAdmin(); return; }
+    if (!accessOn()) { showMenu(); return; }
+    var code = params.get('k');
+    if (code) {
+      code = code.trim().toUpperCase();
+      lsSet(CODE_KEY, code);
+      params.delete('k');
+      var qs = params.toString();
+      try { history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash); } catch (e) {}
+    } else code = lsGet(CODE_KEY);
+    if (!code) { showGate('nocode'); return; }
+    checkAccess(code);
+  }
+
+  function checkAccess(code) {
+    setGated(true); setBack(false);
+    app.innerHTML = mast('Тренажёр по операционному менеджменту') + '<p class="lead">Проверяем доступ…</p>';
+    rpc('check_access', { p_code: code, p_device: deviceId(), p_ua: navigator.userAgent })
+      .then(function (r) {
+        if (r && r.ok) {
+          studentName = r.student || '';
+          lsSet(CODE_KEY, code);
+          lsSet(OK_KEY, JSON.stringify({ code: code, at: Date.now(), student: studentName }));
+          setGated(false); showMenu();
+        } else {
+          if (r && r.reason === 'invalid') lsDel(CODE_KEY);
+          showGate((r && r.reason) || 'invalid', r);
+        }
+      })
+      .catch(function (err) {
+        var o = null; try { o = JSON.parse(lsGet(OK_KEY) || 'null'); } catch (e) {}
+        if (!err.status && o && o.code === code && Date.now() - o.at < ACCESS.offlineDays * DAY) {
+          studentName = o.student || ''; setGated(false); showMenu(); return;
+        }
+        showGate(err.status ? 'server' : 'network');
+      });
+  }
+
+  function showGate(reason, r) {
+    setGated(true); setBack(false);
+    var msg = {
+      nocode: 'Тренажёр открывается по персональной ссылке, которую выдаёт преподаватель. Откройте её или введите код вручную.',
+      invalid: 'Код не найден. Проверьте ссылку или введите код ещё раз.',
+      inactive: 'Доступ по этой ссылке отключён. Обратитесь к преподавателю.',
+      limit: 'Эта ссылка уже используется на ' + ((r && r.max) || 2) + ' ' + plural((r && r.max) || 2, 'устройстве', 'устройствах', 'устройствах') + '. Если вы сменили телефон или очистили браузер, напишите преподавателю: он сбросит устройства.',
+      network: 'Не удалось проверить доступ. Проверьте интернет и попробуйте ещё раз.',
+      server: 'Сервис доступа сейчас не отвечает. Попробуйте позже или напишите преподавателю.'
+    }[reason] || 'Нет доступа.';
+    var retry = reason === 'network' || reason === 'server';
+    app.innerHTML = mast('Тренажёр по операционному менеджменту') +
+      '<section class="card"><h2 class="q">' + (retry ? 'Нет связи' : 'Нужна персональная ссылка') + '</h2><p class="lead">' + msg + '</p>' +
+      (retry ? '<button class="primary" id="gRetry" type="button">Попробовать ещё раз</button>' : '') +
+      '<label for="gCode" style="display:block;margin-top:18px;font-weight:700">Код доступа</label>' +
+      '<input id="gCode" class="codein" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Например, A7F3K2QX" maxlength="20">' +
+      '<button class="' + (retry ? 'secondary' : 'primary') + '" id="gGo" type="button" disabled>Войти</button></section>';
+    var inp = $('gCode');
+    inp.addEventListener('input', function () { $('gGo').disabled = inp.value.trim().length < 6; });
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !$('gGo').disabled) $('gGo').click(); });
+    $('gGo').addEventListener('click', function () { checkAccess(inp.value.trim().toUpperCase()); });
+    if ($('gRetry')) $('gRetry').addEventListener('click', function () { boot(); });
+  }
+
+  function accessInfoHtml() {
+    if (!accessOn()) return '';
+    var code = lsGet(CODE_KEY) || '';
+    return '<h2 class="sec-title">Доступ</h2><section class="card" style="margin-top:8px"><p style="margin:0">' +
+      (studentName ? esc(studentName) + '<br>' : '') + '<span class="muted">Код ' + esc(code) + '</span></p>' +
+      '<p class="note">Ссылка персональная и работает на ограниченном числе устройств. Не пересылайте её другим.</p></section>';
+  }
+
+  /* ---------- Страница преподавателя ---------- */
+  var ADM_KEY = 'opermen_admin_pass';
+  function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+  function uaShort(ua) {
+    ua = ua || '';
+    var os = /iPhone|iPad|iPod/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'Устройство';
+    var br = /YaBrowser/.test(ua) ? 'Яндекс Браузер' : /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox'
+      : /CriOS|Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '';
+    return os + (br ? ' · ' + br : '');
+  }
+  function linkFor(code) { return location.origin + location.pathname + '?k=' + code; }
+  function admErr(err) {
+    if (err && (err.status === 401 || err.status === 403)) return 'Неверный пароль.';
+    if (err && err.status === 404) return 'Функции не найдены. Проверьте, что SQL-скрипт выполнен в Supabase.';
+    if (err && !err.status) return 'Нет связи с Supabase. Проверьте интернет и адрес проекта.';
+    return 'Ошибка: ' + ((err && err.message) || 'неизвестная');
+  }
+  function copyText(text, btn, okLabel) {
+    function done(ok) { if (btn) { var old = btn.textContent; btn.textContent = ok ? (okLabel || 'Скопировано') : 'Не получилось'; setTimeout(function () { btn.textContent = old; }, 1600); } }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    else {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); }
+      document.body.removeChild(ta);
+    }
+  }
+  function csvDownload(rows, name) {
+    var csv = '\ufeff' + rows.map(function (r) { return r.map(function (x) { return '"' + String(x).replace(/"/g, '""') + '"'; }).join(';'); }).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 500);
+  }
+
+  function showAdmin() {
+    setBack(false);
+    if (!accessOn()) {
+      app.innerHTML = mast('Кабинет преподавателя') + '<section class="card"><p style="margin:0">Сначала впишите адрес проекта и ключ Supabase в начало файла index.html (блок ACCESS).</p></section>';
+      return;
+    }
+    var pass = ssGet(ADM_KEY);
+    if (pass) { loadAdmin(pass); return; }
+    app.innerHTML = mast('Кабинет преподавателя') +
+      '<section class="card"><label for="aPass" style="display:block;font-weight:700">Пароль преподавателя</label>' +
+      '<input id="aPass" class="codein" type="password" autocomplete="current-password">' +
+      '<button class="primary" id="aGo" type="button">Войти</button><p id="aMsg" class="errmsg" aria-live="polite"></p></section>';
+    function go() { var p = $('aPass').value; if (p) loadAdmin(p); }
+    $('aGo').addEventListener('click', go);
+    $('aPass').addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+    $('aPass').focus();
+  }
+
+  var admRows = [], admFilter = '';
+  function loadAdmin(pass, keepScroll) {
+    var y = window.scrollY;
+    if (!keepScroll) app.innerHTML = mast('Кабинет преподавателя') + '<p class="lead">Загружаем…</p>';
+    rpc('admin_list', { p_pass: pass }).then(function (rows) {
+      ssSet(ADM_KEY, pass);
+      admRows = rows || [];
+      drawAdmin(pass);
+      if (keepScroll) window.scrollTo(0, y);
+    }).catch(function (err) {
+      if (err && (err.status === 401 || err.status === 403)) { try { sessionStorage.removeItem(ADM_KEY); } catch (e) {} }
+      showAdmin();
+      if ($('aMsg')) $('aMsg').textContent = admErr(err);
+    });
+  }
+
+  function drawAdmin(pass) {
+    var now = Date.now();
+    var devs = admRows.reduce(function (s, r) { return s + (+r.devices || 0); }, 0);
+    var week = admRows.filter(function (r) { return r.last_seen && now - Date.parse(r.last_seen) < 7 * DAY; }).length;
+    var full = admRows.filter(function (r) { return r.active && +r.devices >= r.max_devices; }).length;
+    app.innerHTML = mast('Кабинет преподавателя') +
+      '<section class="card"><div class="big2"><div><b>' + admRows.length + '</b><span>студентов</span></div><div><b>' + devs + '</b><span>устройств</span></div></div>' +
+      '<div class="big2" style="margin-top:16px"><div><b>' + week + '</b><span>заходили за 7 дней</span></div><div><b>' + full + '</b><span>исчерпали лимит</span></div></div>' +
+      '<button class="secondary" id="aRefresh" type="button">Обновить</button></section>' +
+
+      '<h2 class="sec-title">Добавить студентов</h2><section class="card" style="margin-top:8px">' +
+      '<label for="aNames" style="display:block;font-weight:700">Фамилии и имена, по одному в строке</label>' +
+      '<textarea id="aNames" placeholder="Иванов Иван&#10;Петрова Мария"></textarea>' +
+      '<p style="margin:12px 0 0">Устройств на одну ссылку:</p><div class="chips">' +
+      [1, 2, 3].map(function (n) { return '<label class="chip"><input type="radio" name="aMax" value="' + n + '"' + (n === 2 ? ' checked' : '') + '>' + n + '</label>'; }).join('') + '</div>' +
+      '<button class="primary" id="aAdd" type="button" disabled>Создать ссылки</button><div id="aNew"></div></section>' +
+
+      '<h2 class="sec-title">Студенты</h2>' +
+      '<div class="sbox" style="margin-top:8px"><input type="search" id="aFind" style="padding-left:18px" placeholder="Поиск по фамилии или коду" aria-label="Поиск студента"></div>' +
+      '<div class="duo" style="margin-top:4px"><button class="secondary" id="aCopyAll" type="button">Копировать все ссылки</button><button class="secondary" id="aCsv" type="button">Скачать CSV</button></div>' +
+      '<div id="aList"></div>' +
+      '<p style="margin-top:22px"><button class="linklike" id="aOut" type="button">Выйти из кабинета</button></p>';
+
+    $('aRefresh').addEventListener('click', function () { loadAdmin(pass, true); });
+    $('aOut').addEventListener('click', function () { try { sessionStorage.removeItem(ADM_KEY); } catch (e) {} showAdmin(); });
+    $('aNames').addEventListener('input', function () { $('aAdd').disabled = !$('aNames').value.trim(); });
+    $('aAdd').addEventListener('click', function () {
+      var names = $('aNames').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+      var mx = +(app.querySelector('input[name=aMax]:checked') || { value: 2 }).value;
+      $('aAdd').disabled = true; $('aAdd').textContent = 'Создаём…';
+      rpc('admin_add', { p_pass: pass, p_names: names, p_max: mx }).then(function (res) {
+        var lines = (res || []).map(function (r) { return r.student + ' — ' + linkFor(r.code); });
+        admRows = admRows.concat((res || []).map(function (r) { return { code: r.code, student: r.student, max_devices: mx, active: true, devices: 0, last_seen: null, list: null }; }));
+        drawAdmin(pass);
+        $('aNew').innerHTML = '<p class="okmsg" style="margin-top:12px">Создано ссылок: ' + lines.length + '</p>' +
+          '<textarea class="codebox" readonly id="aNewOut"></textarea><button class="primary" id="aNewCopy" type="button">Скопировать новые ссылки</button>';
+        $('aNewOut').value = lines.join('\n');
+        $('aNewCopy').addEventListener('click', function () { copyText(lines.join('\n'), $('aNewCopy')); });
+        $('aNew').scrollIntoView({ block: 'center' });
+      }).catch(function (err) {
+        $('aAdd').disabled = false; $('aAdd').textContent = 'Создать ссылки';
+        $('aNew').innerHTML = '<p class="errmsg">' + admErr(err) + '</p>';
+      });
+    });
+    $('aFind').value = admFilter;
+    $('aFind').addEventListener('input', function () { admFilter = $('aFind').value; drawList(pass); });
+    $('aCopyAll').addEventListener('click', function () {
+      copyText(admRows.map(function (r) { return r.student + ' — ' + linkFor(r.code); }).join('\n'), $('aCopyAll'));
+    });
+    $('aCsv').addEventListener('click', function () {
+      csvDownload([['Студент', 'Код', 'Ссылка', 'Устройств', 'Лимит', 'Активен', 'Последний вход']].concat(admRows.map(function (r) {
+        return [r.student, r.code, linkFor(r.code), r.devices, r.max_devices, r.active ? 'да' : 'нет', r.last_seen ? fmtDate(Date.parse(r.last_seen)) : ''];
+      })), 'opermen-students.csv');
+    });
+    drawList(pass);
+  }
+
+  function drawList(pass) {
+    var q = norm(admFilter.trim());
+    var rows = admRows.filter(function (r) { return !q || norm(r.student).indexOf(q) > -1 || norm(r.code).indexOf(q) > -1; });
+    $('aList').innerHTML = rows.length ? rows.map(function (r) {
+      var over = +r.devices >= r.max_devices;
+      return '<section class="card adm' + (r.active ? '' : ' off') + '" data-code="' + esc(r.code) + '">' +
+        '<div class="adm-top"><strong>' + esc(r.student || 'Без имени') + '</strong><span class="' + (over ? 'st-bad' : 'st-ok') + '">' + r.devices + ' из ' + r.max_devices + '</span></div>' +
+        '<p class="muted" style="margin:2px 0 0;font-size:15px">Код ' + esc(r.code) + (r.active ? '' : ' · отключён') +
+        ' · ' + (r.last_seen ? 'последний вход ' + fmtDate(Date.parse(r.last_seen)) : 'ещё не заходил') + '</p>' +
+        (r.list && r.list.length ? '<ul class="devlist">' + r.list.map(function (d) {
+          return '<li>' + esc(uaShort(d.ua)) + '<span class="muted"> · с ' + fmtDate(Date.parse(d.first)) + '</span></li>';
+        }).join('') + '</ul>' : '') +
+        '<div class="adm-acts">' +
+        '<button type="button" class="flagbtn" data-act="copy">Копировать ссылку</button>' +
+        (+r.devices ? '<button type="button" class="flagbtn" data-act="reset">Сбросить устройства</button>' : '') +
+        '<button type="button" class="flagbtn" data-act="toggle">' + (r.active ? 'Отключить' : 'Включить') + '</button>' +
+        '<label class="flagbtn" style="gap:6px">Лимит <select data-act="max" aria-label="Лимит устройств">' +
+        [1, 2, 3, 4, 5].map(function (n) { return '<option' + (n === r.max_devices ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
+        '<button type="button" class="flagbtn" data-act="del">Удалить</button>' +
+        '</div></section>';
+    }).join('') : '<p class="note">' + (admRows.length ? 'Никого не нашли.' : 'Пока нет ни одного студента. Добавьте список выше.') + '</p>';
+
+    Array.prototype.forEach.call($('aList').querySelectorAll('.adm'), function (card) {
+      var code = card.getAttribute('data-code');
+      card.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('button[data-act]') : null;
+        if (!b) return;
+        var act = b.getAttribute('data-act');
+        if (act === 'copy') { copyText(linkFor(code), b); return; }
+        if ((act === 'reset' || act === 'del') && !b.dataset.armed) {
+          b.dataset.armed = '1'; b.textContent = act === 'del' ? 'Точно удалить?' : 'Точно сбросить?'; return;
+        }
+        b.disabled = true;
+        var row = admRows.filter(function (r) { return r.code === code; })[0];
+        var call = act === 'reset' ? rpc('admin_reset', { p_pass: pass, p_code: code })
+          : act === 'del' ? rpc('admin_delete', { p_pass: pass, p_code: code })
+          : rpc('admin_update', { p_pass: pass, p_code: code, p_active: !row.active });
+        call.then(function () { loadAdmin(pass, true); }).catch(function (err) { b.disabled = false; b.textContent = admErr(err); });
+      });
+      card.querySelector('select[data-act=max]').addEventListener('change', function (e) {
+        var sel = e.target; sel.disabled = true;
+        rpc('admin_update', { p_pass: pass, p_code: code, p_max: +sel.value }).then(function () { loadAdmin(pass, true); })
+          .catch(function (err) { sel.disabled = false; alert(admErr(err)); });
+      });
+    });
+  }
+
+  /* ---------- Статистика ---------- */
+  function showStats() {
+    S = null; setBack(true);
+    var L = store.last || {};
+    var att = ALL.filter(function (c) { return c.uid in L; });
+    var gp = att.reduce(function (s, c) { return s + L[c.uid].p; }, 0);
+    var gm = att.reduce(function (s, c) { return s + maxPts(c); }, 0);
+    var acc = gm ? Math.round(gp / gm * 100) : 0;
+
+    var modsHtml = readyMods().map(function (m) {
+      var a = m.cards.filter(function (c) { return c.uid in L; });
+      var p = a.reduce(function (s, c) { return s + L[c.uid].p; }, 0), mx = a.reduce(function (s, c) { return s + maxPts(c); }, 0);
+      var pc = mx ? Math.round(p / mx * 100) : 0;
+      return '<div class="mrow"><div class="top"><span>Модуль ' + m.n + '. ' + m.title + '</span><span>' + (a.length ? pc + '%' : '—') + '</span></div>' +
+        '<div class="sub">Пройдено ' + a.length + ' из ' + nTasks(m.cards.length) + '</div>' +
+        '<div class="mbar"><i style="width:' + pc + '%"></i></div></div>';
+    }).join('');
+
+    var topics = [], byT = {};
+    att.forEach(function (c) {
+      var k = c.mod.id + '|' + c.topic;
+      if (!byT[k]) { byT[k] = { c: c, p: 0, m: 0 }; topics.push(k); }
+      byT[k].p += L[c.uid].p; byT[k].m += maxPts(c);
+    });
+    var weak = topics.map(function (k) { var o = byT[k]; o.pc = Math.round(o.p / o.m * 100); return o; })
+      .filter(function (o) { return o.pc < 100; }).sort(function (a, b) { return a.pc - b.pc; }).slice(0, 5);
+
+    var hist = (store.examHist || []).slice(-5).reverse();
+    var T = allTerms(), known = (store.flash && store.flash.known) || {};
+    var kn = T.filter(function (t) { return known[t.k]; }).length;
+
+    app.innerHTML = mast('Статистика') +
+      '<section class="card"><div class="big2"><div><b>' + att.length + '<small style="font-size:22px;color:var(--muted)"> / ' + ALL.length + '</small></b><span>заданий пройдено</span></div>' +
+      '<div><b>' + (att.length ? acc + '%' : '—') + '</b><span>точность ответов</span></div></div>' +
+      '<div class="big2" style="margin-top:18px"><div><b>' + readiness() + '%</b><span>готовность к экзамену</span></div>' +
+      '<div><b>' + streak() + '</b><span>' + plural(streak(), 'день', 'дня', 'дней') + ' подряд с целью ' + goalOf() + '</span></div></div>' +
+      '<p class="note">Готовность учитывает все задания курса: сколько вы прошли, насколько верно и насколько давно. Ответы старше недели постепенно весят меньше.</p></section>' +
+      '<h2 class="sec-title">По модулям</h2><section class="card" style="margin-top:8px">' + modsHtml + '</section>' +
+      '<h2 class="sec-title">Слабые темы</h2><section class="card" style="margin-top:8px">' +
+      (weak.length ? '<ul class="parts" style="margin:0">' + weak.map(function (o) {
+        return '<li><span>М' + o.c.mod.n + '. ' + o.c.topic + vidHtml(o.c) + '</span><span>' + o.pc + '%</span></li>';
+      }).join('') + '</ul>' + (errorUids().length ? '<button class="primary" id="goErr" type="button">Работа над ошибками</button>' : '')
+        : '<p style="margin:0">' + (att.length ? 'Слабых тем нет, все пройденные задания решены верно.' : 'Пока нет данных.') + '</p>') +
+      '</section>' +
+      '<h2 class="sec-title">Экзамены</h2><section class="card" style="margin-top:8px">' +
+      (hist.length ? '<ul class="parts" style="margin:0">' + hist.map(function (h) {
+        return '<li><span>' + fmtDate(h.at) + ' · ' + h.n + ' вопр.</span><span>' + h.got + ' из ' + h.total + ' · ' + h.pct + '%</span></li>';
+      }).join('') + '</ul>' : '<p style="margin:0">Экзаменов ещё не было.</p>') + '</section>' +
+      (function () {
+        var withNotes = ALL.filter(function (c) { return noteOf(c.uid); });
+        if (!withNotes.length) return '';
+        return '<h2 class="sec-title">Мои заметки</h2><section class="card notelist" style="margin-top:8px">' + withNotes.map(function (c) {
+          return '<div class="rev"><p class="tm st-ok" style="margin:0;color:var(--accent)">Модуль ' + c.mod.n + ' · ' + KIND_NAME[c.kind] + '</p><h3>' + c.q + '</h3><p>' + esc(noteOf(c.uid)) + '</p></div>';
+        }).join('') + '</section>';
+      })() +
+      (T.length ? '<h2 class="sec-title">Карточки</h2><section class="card" style="margin-top:8px"><p style="margin:0">Знаю ' + kn + ' из ' + T.length + ' терминов</p></section>' : '') +
+      '<p class="note">Статистика учитывает последний ответ на каждое задание в любом режиме. Данные хранятся на этом устройстве.</p>' +
+      '<p><button class="linklike" id="stReset" type="button">Сбросить статистику</button></p>';
+    if ($('goErr')) $('goErr').addEventListener('click', startErrors);
+    var armed = false;
+    $('stReset').addEventListener('click', function () {
+      if (!armed) { armed = true; $('stReset').textContent = 'Сбросить статистику и историю экзаменов? Нажмите ещё раз'; return; }
+      store.last = {}; store.examHist = []; store.errors = { results: {}, finished: false, order: [] }; save(); showStats();
+    });
+  }
+
+  /* ---------- Свой набор ---------- */
+  function topicKey(c) { return c.mod.id + '|' + c.topic; }
+  function showPicker() {
+    S = null; setBack(true);
+    var pick = store.customPick || {};
+    var types = pick.types || ['test', 'match', 'case', 'branch'];
+    var chosen = {};
+    (pick.topics || ALL.map(topicKey)).forEach(function (t) { chosen[t] = true; });
+    var shuf = !!pick.shuffle;
+
+    var cs = customSession(), cst = stOf('custom');
+    var canResume = cs.cards.length && !cst.finished && doneCount(cs) > 0 && doneCount(cs) < cs.cards.length;
+
+    var html = mast('Свой набор') +
+      (canResume ? '<button class="secondary" id="resume" type="button" style="margin-top:0">Продолжить текущий набор · ' + doneCount(cs) + ' из ' + cs.cards.length + '</button>' : '') +
+      '<p class="lead" style="margin-top:14px">Отметьте модули и темы, которые хотите потренировать.</p>' +
+      '<h2 class="sec-title">Тип заданий</h2><div class="chips">' +
+      ['test', 'match', 'case', 'branch'].map(function (k) {
+        return '<label class="chip"><input type="checkbox" name="ty" value="' + k + '"' + (types.indexOf(k) > -1 ? ' checked' : '') + '>' + KIND_NAME[k] + '</label>';
+      }).join('') + '</div>' +
+      '<h2 class="sec-title">Модули и темы</h2>';
+
+    modules.forEach(function (m) {
+      html += '<div class="grp">';
+      if (!m.cards) {
+        html += '<label class="check master"><input type="checkbox" disabled><span class="t">Модуль ' + m.n + '. ' + m.title + '</span></label><p class="soon" style="margin:-6px 0 4px 36px">Скоро</p></div>';
+        return;
+      }
+      var topics = [], byT = {};
+      m.cards.forEach(function (c) { var t = topicKey(c); if (!byT[t]) { byT[t] = []; topics.push(t); } byT[t].push(c); });
+      html += '<label class="check master"><input type="checkbox" data-mod="' + m.id + '"><span class="t">Модуль ' + m.n + '. ' + m.title + '</span></label>';
+      topics.forEach(function (t) {
+        var list = byT[t];
+        html += '<label class="check sub"><input type="checkbox" data-topic="' + t.replace(/"/g, '&quot;') + '" data-of="' + m.id + '"' + (chosen[t] ? ' checked' : '') + '>' +
+          '<span class="t">' + list[0].topic + '</span><span class="cnt" data-cnt="' + t.replace(/"/g, '&quot;') + '"></span></label>';
+      });
+      html += '</div>';
+    });
+
+    html += '<label class="check" style="margin-top:18px"><input type="checkbox" id="shuf"' + (shuf ? ' checked' : '') + '><span class="t">Перемешать задания</span></label>' +
+      '<div class="startbar"><p class="selcount" id="selcount" aria-live="polite"></p>' +
+      '<button class="primary" id="startPick" type="button">Начать</button></div>';
+    app.innerHTML = html;
+
+    var tyBoxes = Array.prototype.slice.call(app.querySelectorAll('input[name=ty]'));
+    var topicBoxes = Array.prototype.slice.call(app.querySelectorAll('input[data-topic]'));
+    var modBoxes = Array.prototype.slice.call(app.querySelectorAll('input[data-mod]'));
+
+    function curTypes() { return tyBoxes.filter(function (b) { return b.checked; }).map(function (b) { return b.value; }); }
+    function curTopics() { return topicBoxes.filter(function (b) { return b.checked; }).map(function (b) { return b.getAttribute('data-topic'); }); }
+    function selection() {
+      var ty = curTypes(), tp = {};
+      curTopics().forEach(function (t) { tp[t] = true; });
+      return ALL.filter(function (c) { return tp[topicKey(c)] && ty.indexOf(c.kind) > -1; });
+    }
+    function persist() {
+      store.customPick = { types: curTypes(), topics: curTopics(), shuffle: $('shuf').checked };
+      save();
+    }
+    function refresh() {
+      var ty = curTypes();
+      modBoxes.forEach(function (mb) {
+        var subs = topicBoxes.filter(function (b) { return b.getAttribute('data-of') === mb.getAttribute('data-mod'); });
+        var on = subs.filter(function (b) { return b.checked; }).length;
+        mb.checked = on === subs.length && on > 0;
+        mb.indeterminate = on > 0 && on < subs.length;
+      });
+      Array.prototype.forEach.call(app.querySelectorAll('[data-cnt]'), function (el) {
+        var t = el.getAttribute('data-cnt');
+        var n = ALL.filter(function (c) { return topicKey(c) === t && ty.indexOf(c.kind) > -1; }).length;
+        el.textContent = n ? nTasks(n) : 'нет';
+        el.parentNode.style.opacity = n ? '' : '.55';
+      });
+      var n = selection().length;
+      $('selcount').textContent = n ? 'Выбрано: ' + nTasks(n) : 'Ничего не выбрано';
+      $('startPick').disabled = !n;
+    }
+
+    tyBoxes.concat(topicBoxes).forEach(function (b) { b.addEventListener('change', function () { refresh(); persist(); }); });
+    modBoxes.forEach(function (mb) {
+      mb.addEventListener('change', function () {
+        topicBoxes.forEach(function (b) { if (b.getAttribute('data-of') === mb.getAttribute('data-mod')) b.checked = mb.checked; });
+        refresh(); persist();
+      });
+    });
+    $('shuf').addEventListener('change', persist);
+    if ($('resume')) $('resume').addEventListener('click', function () { openSession(customSession()); });
+    $('startPick').addEventListener('click', function () {
+      persist();
+      var order = selection().map(function (c) { return c.uid; });
+      if ($('shuf').checked) shuffle(order);
+      store.custom = { results: {}, finished: false, order: order };
+      save();
+      openSession(customSession());
+    });
+    refresh();
+  }
+
+  function render() {
+    if (!S) { showMenu(); return; }
+    setBack(true);
+    var i = currentIndex();
+    if (i === -1) { showResult(); return; }
+    if (state.finished) { state.finished = false; save(); }
+    var c = cards[i];
+    if (c.kind === 'test') showTest(c, i);
+    else if (c.kind === 'match') showMatch(c, i);
+    else if (c.kind === 'branch') showBranch(c, i);
+    else showCase(c, i);
+  }
+
+  load();
+  boot();
+})();
+</script>
+</body>
+</html>
