@@ -363,6 +363,58 @@ body.gated #searchBtn, body.gated #setBtn { display: none; }
 .adm-acts select { min-height: 0; width: auto; padding: 2px 4px; font-size: 15px; border: 0; background: none; }
 .devlist { margin: 8px 0 0; padding-left: 20px; font-size: 15px; }
 
+/* ---------- Нижняя панель и темы ---------- */
+.tabbar {
+  display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  padding: 0 8px env(safe-area-inset-bottom, 0px); background: var(--card); border-top: 1px solid var(--line);
+}
+body.has-tabbar .tabbar { display: block; }
+body.gated .tabbar { display: none !important; }
+body.has-tabbar .wrap { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+.tabbar-in { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 680px; margin: 0 auto; }
+.tab {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 60px; padding: 6px 4px; border: 0; background: none; color: var(--muted); cursor: pointer;
+  font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; font-size: 12px; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap;
+}
+.tab svg { width: 24px; height: 24px; }
+.tab.on { color: var(--accent); }
+.tab.on::before { content: ''; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+.tab:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .tab { transition: color .15s, transform .12s; }
+  .tab:active { transform: scale(.94); }
+  .tab.on svg { animation: pop .3s ease; }
+}
+
+.tmod { margin-top: 12px; overflow: hidden; background: var(--card); border: 1.5px solid var(--line); border-radius: 8px; }
+.tmod.off { opacity: .55; }
+.tmod-h {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; padding: 14px 16px;
+  font: inherit; color: var(--ink); text-align: left; background: none; border: 0; cursor: pointer;
+}
+.tmod-h .mod-body { flex: 1; }
+.chev { flex: none; color: var(--muted); }
+.chev svg { width: 22px; height: 22px; display: block; }
+.tmod.open .chev svg { transform: rotate(180deg); }
+.tmod-b { padding: 0 16px 10px; border-top: 1px solid var(--line); }
+.tmod-all { margin-top: 12px; }
+.tlist { list-style: none; margin: 8px 0 0; padding: 0; }
+.trow {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 10px 2px;
+  font: inherit; font-size: 17px; line-height: 1.35; color: var(--ink); text-align: left;
+  background: none; border: 0; border-top: 1px solid var(--line); cursor: pointer;
+}
+.tlist li:first-child .trow { border-top: 0; }
+.trow .t { flex: 1; }
+.trow:hover .t { color: var(--accent); }
+.tmeta { color: var(--muted); font-size: 14px; white-space: nowrap; }
+.tick { color: var(--ok); font-weight: 700; }
+@media (prefers-reduced-motion: no-preference) {
+  .chev svg { transition: transform .25s ease; }
+  .tmod-b:not([hidden]) { animation: rise .25s ease both; }
+}
+
 /* ---------- Словарь ---------- */
 .tb-r { display: flex; gap: 8px; }
 .sbox { position: relative; margin-top: 4px; }
@@ -445,7 +497,7 @@ try { var t0 = localStorage.getItem('opermen_theme'); if (t0 === 'dark' || t0 ==
 <body>
 <div class="wrap">
   <div class="topbar">
-    <button class="linklike back hide" id="toMenu" type="button">← В главное меню</button>
+    <button class="linklike back hide" id="toMenu" type="button">← Назад</button>
     <div class="tb-r">
       <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск термина" title="Поиск термина"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
       <button class="iconbtn" id="themeBtn" type="button"></button>
@@ -454,6 +506,13 @@ try { var t0 = localStorage.getItem('opermen_theme'); if (t0 === 'dark' || t0 ==
   </div>
   <div id="app"></div>
 </div>
+<nav class="tabbar" aria-label="Разделы">
+  <div class="tabbar-in">
+    <button type="button" class="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg><span>Главная</span></button>
+    <button type="button" class="tab" data-tab="topics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/></svg><span>Темы</span></button>
+    <button type="button" class="tab" data-tab="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.5 9"/></svg><span>Проверить себя</span></button>
+  </div>
+</nav>
 
 <script>
 /* =====================================================================
@@ -5593,7 +5652,7 @@ var ACCESS = {
   /* ---------- Навигация ---------- */
   var timerId = null;
   function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
-  function setBack(v) { stopTimer(); $('toMenu').classList.toggle('hide', !v); }
+  function setBack(v) { stopTimer(); $('toMenu').classList.toggle('hide', !v); document.body.classList.remove('has-tabbar'); }
   $('toMenu').addEventListener('click', goMenu);
   $('searchBtn').addEventListener('click', function () { toTop(); showGlossary(); });
   $('setBtn').addEventListener('click', function () { toTop(); showSettings(); });
@@ -5952,12 +6011,133 @@ var ACCESS = {
     modules.forEach(function (m) { (m.terms || []).forEach(function (t) { out.push({ k: m.id + '|' + t.t, t: t.t, d: t.d, mod: m }); }); });
     return out;
   }
+  /* ---------- Нижняя панель: Главная, Темы, Проверить себя ---------- */
+  var curTab = 'home', TAB_ORDER = ['home', 'topics', 'check'], openMods = {};
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  function setTab(name) {
+    curTab = name;
+    document.body.classList.add('has-tabbar');
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
+      var on = b.getAttribute('data-tab') === name;
+      b.classList.toggle('on', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+  }
   function showMenu() {
-    S = null; setBack(false);
+    if (curTab === 'topics') showTopics();
+    else if (curTab === 'check') showCheck();
+    else showHome();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
+    b.addEventListener('click', function () {
+      var name = b.getAttribute('data-tab');
+      if (name === curTab && !S && document.body.classList.contains('has-tabbar')) { window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); return; }
+      navDir = TAB_ORDER.indexOf(name) < TAB_ORDER.indexOf(curTab) ? 'back' : 'fwd';
+      curTab = name; toTop(); showMenu();
+    });
+  });
+
+  /* Главная */
+  function showHome() {
+    S = null; setBack(false); setTab('home');
     var cs = customSession(), cst = stOf('custom');
     var customStatus = (cs.cards.length && !cst.finished && doneCount(cs) < cs.cards.length)
       ? 'Текущий набор: выполнено ' + doneCount(cs) + ' из ' + cs.cards.length
       : 'Выберите модули, темы и типы заданий';
+    var T = allTerms(), known = (store.flash && store.flash.known) || {};
+    var kn = T.filter(function (t) { return known[t.k]; }).length;
+    app.innerHTML = mast('Тренажёр по операционному менеджменту') + todayPanel() +
+      '<h2 class="sec-title">Учиться</h2><div class="mods">' +
+      modeBtn('modeBank', IC_BANK, 'Весь банк подряд', ALL.length ? statusOf(bankSession()) + ' из всех модулей' : 'Пока нет заданий') +
+      modeBtn('modePick', IC_PICK, 'Свой набор', customStatus) +
+      modeBtn('modeCards', IC_CARDS, 'Карточки терминов', T.length ? 'Знаю ' + kn + ' из ' + T.length : 'Пока нет терминов') +
+      modeBtn('modeDict', IC_SEARCH, 'Словарь терминов', T.length ? 'Поиск по ' + T.length + ' ' + plural(T.length, 'термину', 'терминам', 'терминам') : 'Пока нет терминов') +
+      '</div>' +
+      '<p class="note">Задания по отдельным модулям и темам — во вкладке «Темы». Прогресс сохраняется на этом устройстве.</p>' +
+      '<p class="note kbhint">С клавиатуры: 1–4 выбирают вариант, Enter переходит дальше. В карточках пробел переворачивает, стрелки отмечают «Знаю» и «Повторить».</p>';
+    $('modeBank').disabled = !ALL.length;
+    $('modeCards').disabled = !T.length;
+    $('modeDict').disabled = !T.length;
+    if ($('goToday')) $('goToday').addEventListener('click', function () {
+      var ts = todaySession(), td = doneCount(ts);
+      if (store.today && store.today.day === dayKey() && ts.cards.length && td > 0 && td < ts.cards.length) openSession(ts); else startToday();
+    });
+    $('modeBank').addEventListener('click', function () { openSession(bankSession()); });
+    $('modePick').addEventListener('click', function () { toTop(); showPicker(); });
+    $('modeCards').addEventListener('click', function () { toTop(); showFlash(true); });
+    $('modeDict').addEventListener('click', function () { toTop(); showGlossary(); });
+  }
+
+  /* Темы */
+  function topicSession() {
+    var st = stOf('topic');
+    return { key: 'topic', kind: 'topic', sub: 'Модуль ' + (st.n || '') + '. ' + (st.title || ''),
+      cards: (st.order || []).map(function (u) { return BY_UID[u]; }).filter(Boolean) };
+  }
+  function startTopic(m, t) {
+    var st = store.topic;
+    if (st && st.mod === m.id && st.title === t && !st.finished) {
+      var s = topicSession(), d = doneCount(s);
+      if (d > 0 && d < s.cards.length) { openSession(s); return; }
+    }
+    store.topic = { results: {}, finished: false, mod: m.id, n: m.n, title: t,
+      order: m.cards.filter(function (c) { return c.topic === t; }).map(function (c) { return c.uid; }) };
+    save(); openSession(topicSession());
+  }
+  function topicsOf(m) {
+    var list = [], by = {};
+    (m.cards || []).forEach(function (c) { if (!by[c.topic]) { by[c.topic] = []; list.push(c.topic); } by[c.topic].push(c); });
+    return { list: list, by: by };
+  }
+  function listStats(cardsList) {
+    var L = store.last || {}, a = cardsList.filter(function (c) { return c.uid in L; });
+    var p = a.reduce(function (s, c) { return s + L[c.uid].p; }, 0), mx = a.reduce(function (s, c) { return s + maxPts(c); }, 0);
+    return { done: a.length, pct: mx ? Math.round(p / mx * 100) : 0 };
+  }
+  function showTopics() {
+    S = null; setBack(false); setTab('topics');
+    var html = mast('Темы курса') +
+      '<p class="lead">Нажмите на модуль, чтобы раскрыть его темы. Можно пройти модуль целиком или одну тему.</p>';
+    modules.forEach(function (m, k) {
+      if (!m.cards) {
+        html += '<section class="tmod off"><div class="tmod-h"><span class="mod-n">' + m.n + '</span><span class="mod-body"><span class="mod-title">' + m.title + '</span><span class="mod-status">Скоро</span></span></div></section>';
+        return;
+      }
+      var tp = topicsOf(m), open = !!openMods[m.id];
+      html += '<section class="tmod' + (open ? ' open' : '') + '" data-m="' + m.id + '">' +
+        '<button type="button" class="tmod-h" aria-expanded="' + open + '" aria-controls="tb_' + m.id + '">' +
+        '<span class="mod-n">' + m.n + '</span><span class="mod-body"><span class="mod-title">' + m.title + '</span>' +
+        '<span class="mod-status">' + tp.list.length + ' ' + plural(tp.list.length, 'тема', 'темы', 'тем') + ' · ' + statusOf(moduleSession(m)) + '</span></span>' +
+        '<span class="chev">' + CHEV + '</span></button>' +
+        '<div class="tmod-b" id="tb_' + m.id + '"' + (open ? '' : ' hidden') + '>' +
+        '<button class="primary tmod-all" type="button" data-all="' + k + '">Пройти весь модуль</button>' +
+        '<ul class="tlist">' + tp.list.map(function (t, i) {
+          var cl = tp.by[t], st = listStats(cl), full = st.done === cl.length && st.pct === 100;
+          return '<li><button type="button" class="trow" data-ti="' + i + '">' +
+            '<span class="t">' + esc(t) + '</span>' +
+            '<span class="tmeta">' + (st.done ? st.done + ' из ' + cl.length + ' · ' + st.pct + '%' : nTasks(cl.length)) + '</span>' +
+            (full ? '<span class="tick" aria-label="Тема пройдена без ошибок">✓</span>' : '') + '</button></li>';
+        }).join('') + '</ul></div></section>';
+    });
+    app.innerHTML = html;
+    Array.prototype.forEach.call(app.querySelectorAll('.tmod[data-m]'), function (sec) {
+      var m = modules.filter(function (x) { return x.id === sec.getAttribute('data-m'); })[0], tp = topicsOf(m);
+      var h = sec.querySelector('.tmod-h'), body = sec.querySelector('.tmod-b');
+      h.addEventListener('click', function () {
+        var open = body.hidden;
+        body.hidden = !open; sec.classList.toggle('open', open); h.setAttribute('aria-expanded', open);
+        openMods[m.id] = open;
+      });
+      sec.querySelector('.tmod-all').addEventListener('click', function () { openSession(moduleSession(m)); });
+      Array.prototype.forEach.call(sec.querySelectorAll('.trow'), function (b) {
+        b.addEventListener('click', function () { startTopic(m, tp.list[+b.getAttribute('data-ti')]); });
+      });
+    });
+  }
+
+  /* Проверить себя */
+  function showCheck() {
+    S = null; setBack(false); setTab('check');
     var es = errorsSession(), ed = doneCount(es), errN = errorUids().length;
     var errResume = es.cards.length && ed > 0 && ed < es.cards.length;
     var errStatus = errResume ? 'Выполнено ' + ed + ' из ' + es.cards.length
@@ -5969,56 +6149,20 @@ var ACCESS = {
     var ex = store.exam;
     var exStatus = (ex && !ex.done) ? 'Идёт экзамен: вопрос ' + Math.min(ex.i + 1, ex.order.length) + ' из ' + ex.order.length
       : (store.examHist && store.examHist.length) ? 'Последний: ' + store.examHist[store.examHist.length - 1].pct + '%' : 'Без подсказок, на время';
-    var T = allTerms(), known = (store.flash && store.flash.known) || {};
-    var kn = T.filter(function (t) { return known[t.k]; }).length;
     var L = store.last || {}, att = ALL.filter(function (c) { return c.uid in L; }).length;
-
-    app.innerHTML = mast('Тренажёр по операционному менеджменту') + todayPanel() +
-      '<h2 class="sec-title">Учиться</h2><div class="mods">' +
-      modeBtn('modeBank', IC_BANK, 'Весь банк подряд', ALL.length ? statusOf(bankSession()) + ' из всех модулей' : 'Пока нет заданий') +
-      modeBtn('modePick', IC_PICK, 'Свой набор', customStatus) +
-      modeBtn('modeCards', IC_CARDS, 'Карточки терминов', T.length ? 'Знаю ' + kn + ' из ' + T.length : 'Пока нет терминов') +
-      modeBtn('modeDict', IC_SEARCH, 'Словарь терминов', T.length ? 'Поиск по ' + T.length + ' ' + plural(T.length, 'термину', 'терминам', 'терминам') : 'Пока нет терминов') +
-      '</div>' +
-      '<h2 class="sec-title">Проверить себя</h2><div class="mods">' +
+    app.innerHTML = mast('Проверить себя') +
+      '<div class="mods">' +
       modeBtn('modeErr', IC_ERR, 'Работа над ошибками', errStatus) +
       modeBtn('modeFlag', FLAG_SVG, 'Отмеченные вопросы', flStatus) +
       modeBtn('modeExam', IC_EXAM, 'Экзамен', exStatus) +
-      modeBtn('modeStats', IC_STATS, 'Статистика', att ? 'Пройдено ' + att + ' из ' + nTasks(ALL.length) : 'Появится после первых ответов') +
-      '</div>' +
-      '<h2 class="sec-title">Модули</h2>' +
-      '<div class="mods">' + modules.map(function (m, k) {
-        var ready = !!m.cards;
-        return '<button type="button" class="mod" data-k="' + k + '"' + (ready ? '' : ' disabled') + '>' +
-          '<span class="mod-n">' + m.n + '</span>' +
-          '<span class="mod-body"><span class="mod-title">' + m.title + '</span>' +
-          '<span class="mod-status">' + (ready ? statusOf(moduleSession(m)) : 'Скоро') + '</span></span></button>';
-      }).join('') + '</div>' +
-      '<p class="note">Новые модули открываются по мере выхода видео. Прогресс сохраняется на этом устройстве.</p>' +
-      '<p class="note kbhint">С клавиатуры: 1–4 выбирают вариант, Enter переходит дальше. В карточках пробел переворачивает, стрелки отмечают «Знаю» и «Повторить».</p>';
-    $('modeBank').disabled = !ALL.length;
-    if ($('goToday')) $('goToday').addEventListener('click', function () {
-      var ts = todaySession(), td = doneCount(ts);
-      if (store.today && store.today.day === dayKey() && ts.cards.length && td > 0 && td < ts.cards.length) openSession(ts); else startToday();
-    });
-    $('modeCards').disabled = !T.length;
-    $('modeDict').disabled = !T.length;
-    $('modeDict').addEventListener('click', function () { toTop(); showGlossary(); });
+      modeBtn('modeStats', IC_STATS, 'Статистика', att ? 'Пройдено ' + att + ' из ' + nTasks(ALL.length) + ' · готовность ' + readiness() + '%' : 'Появится после первых ответов') +
+      '</div>';
     $('modeErr').disabled = !errN && !errResume;
     $('modeFlag').disabled = !flN && !flResume;
-    $('modeFlag').addEventListener('click', function () { if (flResume) openSession(fs); else startFlagged(); });
-    $('modeBank').addEventListener('click', function () { openSession(bankSession()); });
-    $('modePick').addEventListener('click', function () { toTop(); showPicker(); });
-    $('modeCards').addEventListener('click', function () { toTop(); showFlash(true); });
     $('modeErr').addEventListener('click', function () { if (errResume) openSession(es); else startErrors(); });
-    $('modeExam').addEventListener('click', function () {
-      toTop();
-      if (store.exam && !store.exam.done) showExamQ(); else showExamSetup();
-    });
+    $('modeFlag').addEventListener('click', function () { if (flResume) openSession(fs); else startFlagged(); });
+    $('modeExam').addEventListener('click', function () { toTop(); if (store.exam && !store.exam.done) showExamQ(); else showExamSetup(); });
     $('modeStats').addEventListener('click', function () { toTop(); showStats(); });
-    Array.prototype.forEach.call(app.querySelectorAll('.mod[data-k]:not([disabled])'), function (b) {
-      b.addEventListener('click', function () { openSession(moduleSession(modules[+b.getAttribute('data-k')])); });
-    });
   }
 
   /* ---------- Экзамен ---------- */
