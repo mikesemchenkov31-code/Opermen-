@@ -225,6 +225,11 @@ legend { padding: 0; margin-bottom: 6px; font-weight: 700; }
 .st-ok { color: var(--ok); font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; }
 .st-bad { color: var(--bad); font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 500; }
 .muted { color: var(--muted); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.extext { width: 100%; min-height: 220px; margin-top: 10px; }
+.exans { padding: 10px 12px; background: var(--paper); border-left: 4px solid var(--line); border-radius: 4px; white-space: normal; }
+.exmodel { margin: 10px 0; }
+.exmodel summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
 .flash { width: 100%; margin-top: 18px; text-align: center; font: inherit; color: var(--ink); cursor: pointer; }
 .flash .ft { font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif; font-weight: 700; font-size: 30px; line-height: 1.15; }
 .flash .fd { font-size: 19px; line-height: 1.5; }
@@ -7004,7 +7009,7 @@ var ACCESS = {
       : flN ? 'Отмечено ' + nTasks(flN) : 'Отмечайте сложные вопросы флажком';
     var ex = store.exam;
     var exStatus = (ex && !ex.done) ? 'Идёт экзамен: вопрос ' + Math.min(ex.i + 1, ex.order.length) + ' из ' + ex.order.length
-      : (store.examHist && store.examHist.length) ? 'Последний: ' + store.examHist[store.examHist.length - 1].pct + '%' : 'Без подсказок, на время';
+      : (store.examHist && store.examHist.length) ? (function (h) { return 'Последний: ' + String(h.got).replace('.', ',') + ' из ' + h.total + ' · ' + h.pct + '%'; })(store.examHist[store.examHist.length - 1]) : '10 тестов + 6 открытых · 50 баллов · 45 мин';
     var T = allTerms(), known = (store.flash && store.flash.known) || {};
     var kn = T.filter(function (t) { return known[t.k]; }).length;
     var L = store.last || {}, att = ALL.filter(function (c) { return c.uid in L; }).length;
@@ -7058,13 +7063,74 @@ var ACCESS = {
   }
 
   /* ---------- Экзамен ---------- */
+  /* Формат как на экзамене: 10 тестов по 2 балла + 6 открытых вопросов по 5 баллов = 50 баллов, 45 минут */
+  var REAL = { tests: 10, tPts: 2, open: 6, oPts: 5, min: 45 };
+  /* Объёмные кейсы, которые не помещаются в 5–6 минут, в экзамен не попадают */
+  var EXAM_SKIP = ['m7.c2', 'm7.k1', 'm3.c3', 'm2.c4', 'm2.c2', 'm2.c3'];
+
   function examPool(mods) {
     return ALL.filter(function (c) { return (c.kind === 'test' || c.kind === 'match') && mods.indexOf(c.mod.id) > -1; });
   }
+  function realPools(mods) {
+    var inMods = ALL.filter(function (c) { return mods.indexOf(c.mod.id) > -1; });
+    return {
+      tests: inMods.filter(function (c) { return c.kind === 'test'; }),
+      open: inMods.filter(function (c) { return c.kind === 'case' && EXAM_SKIP.indexOf(c.uid) < 0; })
+    };
+  }
+  /* Равномерно по модулям: по кругу из перемешанных групп */
+  function spread(pool, n) {
+    var groups = {}, keys = [];
+    pool.forEach(function (c) { if (!groups[c.mod.id]) { groups[c.mod.id] = []; keys.push(c.mod.id); } groups[c.mod.id].push(c); });
+    keys = shuffle(keys);
+    keys.forEach(function (k) { groups[k] = shuffle(groups[k]); });
+    var out = [];
+    while (out.length < n) {
+      var added = false;
+      for (var i = 0; i < keys.length && out.length < n; i++) {
+        var g = groups[keys[i]];
+        if (g.length) { out.push(g.shift()); added = true; }
+      }
+      if (!added) break;
+    }
+    return out;
+  }
+  function isReal(ex) { return !!(ex && ex.fmt === 'real'); }
+  function qMax(c, ex) {
+    if (isReal(ex)) return c.kind === 'case' ? REAL.oPts : REAL.tPts;
+    return maxPts(c);
+  }
+  function selfChecked(c, ex) {
+    var v = ex.self && ex.self[c.uid];
+    return v ? v.filter(function (x) { return x; }).length : 0;
+  }
+  function openPts(c, ex) {
+    if (!ex.self || !ex.self[c.uid]) return 0;
+    return Math.round(REAL.oPts * selfChecked(c, ex) / c.checks.length * 2) / 2;
+  }
+  function qScore(c, ex) {
+    if (c.kind === 'case') return openPts(c, ex);
+    var p = examPts(c, ex.ans[c.uid]);
+    return isReal(ex) ? p * REAL.tPts : p;
+  }
+  function examTotals(ex) {
+    var got = 0, total = 0, tGot = 0, tTot = 0, oGot = 0, oTot = 0, pending = 0;
+    ex.order.forEach(function (u) {
+      var c = BY_UID[u]; if (!c) return;
+      var p = qScore(c, ex), m = qMax(c, ex);
+      got += p; total += m;
+      if (c.kind === 'case') { oGot += p; oTot += m; if (!ex.self || !ex.self[u]) pending++; }
+      else { tGot += p; tTot += m; }
+    });
+    return { got: got, total: total, tGot: tGot, tTot: tTot, oGot: oGot, oTot: oTot, pending: pending };
+  }
+  function fmtPts(x) { return String(x).replace('.', ','); }
+
   function showExamSetup() {
     S = null; setBack(true);
     var ready = readyMods();
     var cfg = store.examCfg || {};
+    var fSel = cfg.f || 'real';
     var nSel = cfg.n == null ? 10 : cfg.n, tSel = cfg.min == null ? 20 : cfg.min;
     var mods = cfg.mods || ready.map(function (m) { return m.id; });
     function chip(name, type, val, label, on) {
@@ -7072,33 +7138,64 @@ var ACCESS = {
     }
     var last = store.exam && store.exam.done;
     app.innerHTML = mast('Экзамен') +
-      '<p class="lead">Вопросы идут без подсказок, правильные ответы и разбор появятся в конце. Кейсы в экзамен не входят: их вы проверяете сами по образцу.</p>' +
       (last ? '<button class="secondary" id="lastRev" type="button" style="margin-top:0">Разбор последнего экзамена</button>' : '') +
+      '<h2 class="sec-title">Формат</h2><div class="chips">' +
+      chip('f', 'radio', 'real', 'Как на экзамене', fSel === 'real') + chip('f', 'radio', 'train', 'Тренировка', fSel === 'train') + '</div>' +
+      '<div id="realInfo"><section class="card" style="margin-top:10px">' +
+      '<ul class="parts" style="margin:0">' +
+      '<li><span>Множественный выбор</span><span>' + REAL.tests + ' × ' + REAL.tPts + ' = ' + (REAL.tests * REAL.tPts) + '</span></li>' +
+      '<li><span>Открытый вопрос</span><span>' + REAL.open + ' × ' + REAL.oPts + ' = ' + (REAL.open * REAL.oPts) + '</span></li>' +
+      '<li><span><strong>Итого</strong></span><span><strong>' + (REAL.tests * REAL.tPts + REAL.open * REAL.oPts) + ' баллов</strong></span></li>' +
+      '</ul><p class="note" style="margin-bottom:0">Продолжительность — ' + REAL.min + ' минут. Тест засчитывается, только если выбраны все верные варианты. ' +
+      'Открытые ответы после сдачи вы оцениваете сами по образцу и критериям: 5 баллов делятся пропорционально выполненным критериям.</p></section></div>' +
+      '<div id="trainOpts">' +
+      '<p class="lead" style="margin-top:12px">Тесты и сопоставления без подсказок, по 1 баллу за верный ответ или строку. Разбор появится в конце.</p>' +
       '<h2 class="sec-title">Количество вопросов</h2><div class="chips">' +
       chip('n', 'radio', 10, '10', nSel === 10) + chip('n', 'radio', 20, '20', nSel === 20) + chip('n', 'radio', 0, 'Все', nSel === 0) + '</div>' +
       '<h2 class="sec-title">Время</h2><div class="chips">' +
       chip('t', 'radio', 10, '10 мин', tSel === 10) + chip('t', 'radio', 20, '20 мин', tSel === 20) +
-      chip('t', 'radio', 30, '30 мин', tSel === 30) + chip('t', 'radio', 0, 'Без таймера', tSel === 0) + '</div>' +
+      chip('t', 'radio', 30, '30 мин', tSel === 30) + chip('t', 'radio', 0, 'Без таймера', tSel === 0) + '</div></div>' +
       '<h2 class="sec-title">Модули</h2><div class="chips">' +
       ready.map(function (m) { return chip('m', 'checkbox', m.id, 'Модуль ' + m.n, mods.indexOf(m.id) > -1); }).join('') + '</div>' +
-      '<p class="note">Таймер идёт, даже если закрыть экзамен. Вернуться к нему можно из главного меню.</p>' +
+      '<p class="note">Вопросы набираются равномерно из выбранных модулей. Таймер идёт, даже если закрыть экзамен. Вернуться к нему можно из главного меню.</p>' +
       '<div class="startbar"><p class="selcount" id="selcount" aria-live="polite"></p>' +
       '<button class="primary" id="startExam" type="button">Начать экзамен</button></div>';
-    function val(name) { var e = app.querySelector('input[name=' + name + ']:checked'); return e ? +e.value : 0; }
+    function val(name) { var e = app.querySelector('input[name=' + name + ']:checked'); return e ? (isNaN(+e.value) ? e.value : +e.value) : 0; }
     function curMods() { return Array.prototype.map.call(app.querySelectorAll('input[name=m]:checked'), function (b) { return b.value; }); }
+    function plan() {
+      if (val('f') === 'real') {
+        var P = realPools(curMods());
+        var nT = Math.min(REAL.tests, P.tests.length), nO = Math.min(REAL.open, P.open.length);
+        return { real: true, nT: nT, nO: nO, n: nT + nO, pts: nT * REAL.tPts + nO * REAL.oPts, P: P };
+      }
+      var pool = examPool(curMods()).length;
+      return { real: false, n: val('n') ? Math.min(val('n'), pool) : pool };
+    }
     function refresh() {
-      var pool = examPool(curMods()).length, n = val('n') ? Math.min(val('n'), pool) : pool;
-      $('selcount').textContent = n ? 'Будет вопросов: ' + n + (val('t') ? ', время ' + val('t') + ' мин' : ', без таймера') : 'Нет вопросов для экзамена';
-      $('startExam').disabled = !n;
-      store.examCfg = { n: val('n'), min: val('t'), mods: curMods() }; save();
+      var real = val('f') === 'real';
+      $('realInfo').hidden = !real; $('trainOpts').hidden = real;
+      var p = plan();
+      if (!p.n) $('selcount').textContent = 'Нет вопросов для экзамена';
+      else if (p.real) $('selcount').textContent = (p.nT === REAL.tests && p.nO === REAL.open)
+        ? REAL.tests + ' тестов и ' + REAL.open + ' открытых вопросов · ' + p.pts + ' баллов · ' + REAL.min + ' мин'
+        : 'В выбранных модулях: ' + p.nT + ' тестов и ' + p.nO + ' открытых · ' + p.pts + ' баллов · ' + REAL.min + ' мин';
+      else $('selcount').textContent = 'Будет вопросов: ' + p.n + (val('t') ? ', время ' + val('t') + ' мин' : ', без таймера');
+      $('startExam').disabled = !p.n;
+      store.examCfg = { f: val('f'), n: val('n'), min: val('t'), mods: curMods() }; save();
     }
     Array.prototype.forEach.call(app.querySelectorAll('.chips input'), function (b) { b.addEventListener('change', refresh); });
     if ($('lastRev')) $('lastRev').addEventListener('click', function () { toTop(); showExamResult(); });
     $('startExam').addEventListener('click', function () {
-      var pool = shuffle(examPool(curMods())), n = val('n') ? Math.min(val('n'), pool.length) : pool.length;
-      var now = Date.now();
-      store.exam = { order: pool.slice(0, n).map(function (c) { return c.uid; }), ans: {}, perm: {}, i: 0,
-        start: now, endAt: val('t') ? now + val('t') * 60000 : 0, done: false };
+      var p = plan(), now = Date.now(), order, endAt;
+      if (p.real) {
+        order = spread(p.P.tests, p.nT).concat(spread(p.P.open, p.nO)).map(function (c) { return c.uid; });
+        endAt = now + REAL.min * 60000;
+      } else {
+        order = shuffle(examPool(curMods())).slice(0, p.n).map(function (c) { return c.uid; });
+        endAt = val('t') ? now + val('t') * 60000 : 0;
+      }
+      store.exam = { fmt: p.real ? 'real' : 'train', order: order, ans: {}, perm: {}, self: {}, i: 0,
+        start: now, endAt: endAt, done: false };
       save(); toTop(); showExamQ();
     });
     refresh();
@@ -7120,34 +7217,44 @@ var ACCESS = {
     if (ex.i >= ex.order.length) { finishExam(false); return; }
     var c = BY_UID[ex.order[ex.i]];
     if (!c) { ex.i++; save(); showExamQ(); return; }
-    var N = ex.order.length, last = ex.i === N - 1;
-    var body = '';
+    var N = ex.order.length, last = ex.i === N - 1, real = isReal(ex);
+    var body = '', label = '';
     if (c.kind === 'test') {
       if (!ex.perm[c.uid]) { ex.perm[c.uid] = shuffle(c.opts.map(function (o, k) { return k; })); save(); }
       body = ex.perm[c.uid].map(function (k, pos) {
         var on = c.multi ? (ex.ans[c.uid] || []).indexOf(k) > -1 : ex.ans[c.uid] === k;
         return '<button type="button" class="opt' + (on ? ' sel' : '') + '" data-o="' + k + '" aria-pressed="' + on + '"><span class="kbd">' + (pos + 1) + '</span><span class="ot">' + c.opts[k][0] + '</span></button>';
       }).join('');
-      if (c.multi) body = '<p class="hint">Выберите все верные варианты</p>' + body;
+      if (c.multi) body = '<p class="hint">Выберите все верные ответы</p>' + body;
+      label = real ? 'Множественный выбор · ' + REAL.tPts + ' балла' : KIND_NAME[c.kind];
+    } else if (c.kind === 'case') {
+      body = '<p class="lead">' + c.lead + '</p>' +
+        '<p class="hint">Что раскрыть в ответе: ' + c.fields.map(function (f) { return f.label; }).join(' · ') + '</p>' +
+        '<label for="exText" class="sr">Ваш ответ</label>' +
+        '<textarea id="exText" class="extext" rows="12" placeholder="Ваш ответ"></textarea>';
+      label = 'Открытый вопрос · ' + REAL.oPts + ' баллов';
     } else {
       var a = ex.ans[c.uid] || [];
       body = c.rows.map(function (r, k) {
         return '<div class="row"><label for="s' + k + '">' + r[0] + '</label><select id="s' + k + '" data-r="' + k + '"><option value="">Выберите вариант</option>' +
           c.choices.map(function (x) { return '<option value="' + x + '"' + (a[k] === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div>';
       }).join('');
+      label = KIND_NAME[c.kind];
     }
     app.innerHTML = mast('Экзамен') +
       '<div class="exbar"><span>Вопрос ' + (ex.i + 1) + ' из ' + N + '</span>' + (ex.endAt ? '<span class="timer" id="timer" role="timer" aria-label="Осталось времени"></span>' : '') + '</div>' +
       '<div class="prog"><div class="bar" style="width:' + Math.round(ex.i / N * 100) + '%"></div></div>' +
-      '<section class="card"><p class="kind">' + KIND_NAME[c.kind] + ' · Модуль ' + c.mod.n + '</p><h2 class="q">' + c.q + '</h2>' + toolsRow(c) + body +
+      '<section class="card"><p class="kind">' + label + ' · Модуль ' + c.mod.n + '</p><h2 class="q">' + c.q + '</h2>' + toolsRow(c) + body +
       '<button class="primary" id="exNext" type="button"></button>' +
+      (ex.i > 0 ? '<button class="secondary" id="exPrev" type="button">Предыдущий вопрос</button>' : '') +
       '<p style="margin:10px 0 0;text-align:center"><button class="linklike" id="exEnd" type="button">Завершить экзамен досрочно</button></p></section>';
     function answered() {
       var v = ex.ans[c.uid];
+      if (c.kind === 'case') return !!(v && String(v).trim());
       if (c.kind === 'test' && c.multi) return !!(v && v.length);
       return c.kind === 'test' ? v != null : !!(v && v.some(function (x) { return x; }));
     }
-    function label() { $('exNext').textContent = last ? 'Завершить экзамен' : (answered() ? 'Дальше' : 'Пропустить'); }
+    function label2() { $('exNext').textContent = last ? 'Завершить экзамен' : (answered() ? 'Дальше' : 'Пропустить'); }
     if (c.kind === 'test') {
       Array.prototype.forEach.call(app.querySelectorAll('.opt'), function (b) {
         b.addEventListener('click', function () {
@@ -7156,24 +7263,29 @@ var ACCESS = {
             if (at > -1) arr.splice(at, 1); else arr.push(o);
             ex.ans[c.uid] = arr; save();
             b.classList.toggle('sel', at < 0); b.setAttribute('aria-pressed', at < 0);
-            label(); return;
+            label2(); return;
           }
           ex.ans[c.uid] = +b.getAttribute('data-o'); save();
           Array.prototype.forEach.call(app.querySelectorAll('.opt'), function (x) {
             var on = x === b; x.classList.toggle('sel', on); x.setAttribute('aria-pressed', on);
           });
-          label();
+          label2();
         });
       });
+    } else if (c.kind === 'case') {
+      var ta = $('exText');
+      ta.value = ex.ans[c.uid] || '';
+      ta.addEventListener('input', function () { ex.ans[c.uid] = ta.value; save(); label2(); });
     } else {
       Array.prototype.forEach.call(app.querySelectorAll('select'), function (s) {
         s.addEventListener('change', function () {
-          var arr = ex.ans[c.uid] || []; arr[+s.getAttribute('data-r')] = s.value; ex.ans[c.uid] = arr; save(); label();
+          var arr = ex.ans[c.uid] || []; arr[+s.getAttribute('data-r')] = s.value; ex.ans[c.uid] = arr; save(); label2();
         });
       });
     }
-    label();
+    label2();
     $('exNext').addEventListener('click', function () { ex.i++; save(); toTop(); showExamQ(); });
+    if ($('exPrev')) $('exPrev').addEventListener('click', function () { ex.i = Math.max(0, ex.i - 1); save(); toTop(); showExamQ(); });
     var armed = false;
     $('exEnd').addEventListener('click', function () {
       if (!armed) { armed = true; $('exEnd').textContent = 'Точно завершить? Нажмите ещё раз'; return; }
@@ -7191,59 +7303,147 @@ var ACCESS = {
     a = a || [];
     return c.rows.reduce(function (s, r, k) { return s + (a[k] === r[1] ? 1 : 0); }, 0);
   }
+  function syncHist(ex) {
+    var t = examTotals(ex);
+    ex.got = t.got; ex.total = t.total;
+    var pct = t.total ? Math.round(t.got / t.total * 100) : 0;
+    (store.examHist || []).forEach(function (h) { if (h.at === ex.finish) { h.got = t.got; h.total = t.total; h.pct = pct; } });
+    return t;
+  }
   function finishExam(timeout) {
     stopTimer();
     var ex = store.exam;
     if (!ex || ex.done) { toTop(); showExamResult(); return; }
-    var got = 0, total = 0;
+    if (!ex.self) ex.self = {};
     ex.order.forEach(function (u) {
-      var c = BY_UID[u]; if (!c) return;
-      var A = ex.ans[u], p = examPts(c, A); got += p; total += maxPts(c);
+      var c = BY_UID[u]; if (!c || c.kind === 'case') return;
+      var A = ex.ans[u], p = examPts(c, A);
       if (c.kind === 'test' && c.multi ? !!(A && A.length) : c.kind === 'test' ? A != null : !!(A && A.some(function (x) { return x; }))) recordLast(c, p);
     });
-    ex.done = true; ex.timeout = !!timeout; ex.got = got; ex.total = total;
+    ex.done = true; ex.timeout = !!timeout;
     ex.finish = Math.min(Date.now(), ex.endAt || Infinity);
-    var pct = total ? Math.round(got / total * 100) : 0;
+    var t = examTotals(ex);
+    ex.got = t.got; ex.total = t.total;
     if (!store.examHist) store.examHist = [];
-    store.examHist.push({ at: ex.finish, got: got, total: total, pct: pct, n: ex.order.length });
+    store.examHist.push({ at: ex.finish, got: t.got, total: t.total, pct: t.total ? Math.round(t.got / t.total * 100) : 0, n: ex.order.length });
     if (store.examHist.length > 20) store.examHist.shift();
     save(); toTop(); showExamResult();
   }
 
+  function revTest(c, a, i, ex) {
+    var p = examPts(c, a), full = p === maxPts(c), detail = '', real = isReal(ex);
+    if (c.kind === 'test' && c.multi) {
+      var rightM = c.opts.filter(function (o) { return o[1]; }).map(function (o) { return o[0]; }).join('; ');
+      detail = '<p>Ваш ответ: ' + (a && a.length ? a.map(function (k) { return c.opts[k][0]; }).join('; ') : '<span class="muted">нет ответа</span>') + '</p>' +
+        (full ? '' : '<p>Правильный ответ: <strong>' + rightM + '</strong></p>');
+    } else if (c.kind === 'test') {
+      var right = c.opts.filter(function (o) { return o[1]; })[0][0];
+      detail = '<p>Ваш ответ: ' + (a != null ? c.opts[a][0] : '<span class="muted">нет ответа</span>') + '</p>' +
+        (full ? '' : '<p>Правильный ответ: <strong>' + right + '</strong></p>');
+    } else {
+      a = a || [];
+      detail = '<p>Верно ' + p + ' из ' + c.rows.length + '</p>' + c.rows.map(function (r, k) {
+        return a[k] === r[1] ? '' : '<p>' + r[0] + ': ' + (a[k] ? a[k] : 'нет ответа') + ' → <strong>' + r[1] + '</strong></p>';
+      }).join('');
+    }
+    var verdict = full ? 'Верно' : (p ? 'Частично' : 'Неверно');
+    if (real) verdict += ' · ' + (full ? REAL.tPts : 0) + ' из ' + REAL.tPts;
+    return '<div class="rev"><p style="margin:0" class="' + (full ? 'st-ok' : 'st-bad') + '">' + (i + 1) + '. ' + verdict + '</p>' +
+      '<h3>' + c.q + '</h3>' + detail + '<div class="qtools" style="margin:8px 0 0">' + flagBtn(c) + noteBtn(c) + '</div>' + noteBox(c) + (full ? '' : '<p class="muted">' + linkTerms(c.exp) + vidHtml(c) + '</p>') + '</div>';
+  }
+  function revOpen(c, i, ex) {
+    var a = String(ex.ans[c.uid] || '').trim(), sel = (ex.self && ex.self[c.uid]) || [];
+    return '<div class="rev" data-open="' + c.uid + '"><p style="margin:0" class="st-open" data-pts="' + c.uid + '"></p>' +
+      '<h3>' + (i + 1) + '. ' + c.q + '</h3>' +
+      '<p class="muted">' + c.lead + '</p>' +
+      '<p><strong>Ваш ответ:</strong></p>' +
+      (a ? '<p class="exans">' + esc(a).replace(/\n/g, '<br>') + '</p>' : '<p class="muted">Ответа нет.</p>') +
+      '<details class="exmodel"><summary>Образец ответа</summary>' +
+      c.fields.map(function (f) { return '<p><strong>' + f.label + '.</strong> ' + linkTerms(f.model) + '</p>'; }).join('') + '</details>' +
+      (a && aiReady() ? '<div class="aibox"><button type="button" class="aibtn" data-ai="' + c.uid + '">' + SPARK + '<span>Проверить с Claude</span></button><div class="aiout" aria-live="polite"></div></div>' : '') +
+      '<fieldset><legend>Отметьте критерии, которые есть в вашем ответе</legend>' +
+      c.checks.map(function (t, k) { return '<label class="check"><input type="checkbox" data-u="' + c.uid + '" data-k="' + k + '"' + (sel[k] ? ' checked' : '') + (a ? '' : ' disabled') + '><span>' + t + '</span></label>'; }).join('') +
+      '</fieldset><div class="qtools" style="margin:8px 0 0">' + flagBtn(c) + noteBtn(c) + '</div>' + noteBox(c) + '</div>';
+  }
+
   function showExamResult() {
     S = null; setBack(true);
-    var ex = store.exam;
-    var pct = ex.total ? Math.round(ex.got / ex.total * 100) : 0;
+    var ex = store.exam, real = isReal(ex);
+    if (!ex.self) ex.self = {};
     var mins = Math.max(1, Math.round((ex.finish - ex.start) / 60000));
-    var verdict = pct >= 85 ? 'Отлично, экзамен сдан уверенно.' : pct >= 60 ? 'Неплохо, но есть пробелы. Разбор ниже.' : 'Пока слабо. Разберите ошибки и пройдите работу над ошибками.';
-    var rev = ex.order.map(function (u, i) {
-      var c = BY_UID[u]; if (!c) return '';
-      var a = ex.ans[u], p = examPts(c, a), full = p === maxPts(c), detail = '';
-      if (c.kind === 'test' && c.multi) {
-        var rightM = c.opts.filter(function (o) { return o[1]; }).map(function (o) { return o[0]; }).join('; ');
-        detail = '<p>Ваш ответ: ' + (a && a.length ? a.map(function (k) { return c.opts[k][0]; }).join('; ') : '<span class="muted">нет ответа</span>') + '</p>' +
-          (full ? '' : '<p>Правильный ответ: <strong>' + rightM + '</strong></p>');
-      } else if (c.kind === 'test') {
-        var right = c.opts.filter(function (o) { return o[1]; })[0][0];
-        detail = '<p>Ваш ответ: ' + (a != null ? c.opts[a][0] : '<span class="muted">нет ответа</span>') + '</p>' +
-          (full ? '' : '<p>Правильный ответ: <strong>' + right + '</strong></p>');
-      } else {
-        a = a || [];
-        detail = '<p>Верно ' + p + ' из ' + c.rows.length + '</p>' + c.rows.map(function (r, k) {
-          return a[k] === r[1] ? '' : '<p>' + r[0] + ': ' + (a[k] ? a[k] : 'нет ответа') + ' → <strong>' + r[1] + '</strong></p>';
-        }).join('');
-      }
-      return '<div class="rev"><p style="margin:0" class="' + (full ? 'st-ok' : 'st-bad') + '">' + (i + 1) + '. ' + (full ? 'Верно' : (p ? 'Частично' : 'Неверно')) + '</p>' +
-        '<h3>' + c.q + '</h3>' + detail + '<div class="qtools" style="margin:8px 0 0">' + flagBtn(c) + noteBtn(c) + '</div>' + noteBox(c) + (full ? '' : '<p class="muted">' + linkTerms(c.exp) + vidHtml(c) + '</p>') + '</div>';
-    }).join('');
+    var tests = [], opens = [];
+    ex.order.forEach(function (u, i) { var c = BY_UID[u]; if (!c) return; (c.kind === 'case' ? opens : tests).push({ c: c, i: i }); });
+    /* Открытые вопросы без ответа сразу получают 0 */
+    opens.forEach(function (o) { if (!String(ex.ans[o.c.uid] || '').trim() && !ex.self[o.c.uid]) ex.self[o.c.uid] = o.c.checks.map(function () { return false; }); });
+    syncHist(ex); save();
     app.innerHTML = mast('Экзамен. Итог') +
-      '<section class="card"><p class="score">' + ex.got + ' <small>из ' + ex.total + '</small></p>' +
-      '<p class="pct">' + pct + '% · ' + mins + ' мин' + (ex.timeout ? ' · время вышло' : '') + '</p>' +
-      '<p class="lead"><strong>' + verdict + '</strong></p>' +
+      '<section class="card"><p class="score" id="exScore"></p><p class="pct" id="exPct"></p>' +
+      (real ? '<ul class="parts" id="exParts" style="margin:6px 0 0"></ul>' : '') +
+      '<p class="lead" id="exVerdict"></p>' +
       '<button class="primary" id="newExam" type="button">Новый экзамен</button>' +
       (errorUids().length ? '<button class="secondary" id="goErr" type="button">Работа над ошибками</button>' : '') +
       '</section>' +
-      '<section class="card"><h2 class="q" style="margin:0">Разбор</h2>' + rev + '</section>';
+      '<section class="card"><h2 class="q" style="margin:0">' + (real ? 'Часть 1. Множественный выбор' : 'Разбор') + '</h2>' +
+      tests.map(function (o) { return revTest(o.c, ex.ans[o.c.uid], o.i, ex); }).join('') + '</section>' +
+      (opens.length ? '<section class="card"><h2 class="q" style="margin:0">Часть 2. Открытые вопросы</h2>' +
+        '<p class="note">Сравните свой ответ с образцом и честно отметьте выполненные критерии. Баллы за вопрос: 5 × доля отмеченных критериев, с округлением до 0,5.</p>' +
+        opens.map(function (o) { return revOpen(o.c, o.i, ex); }).join('') + '</section>' : '');
+    function draw() {
+      var t = syncHist(ex), pct = t.total ? Math.round(t.got / t.total * 100) : 0;
+      $('exScore').innerHTML = fmtPts(t.got) + ' <small>из ' + t.total + '</small>';
+      $('exPct').textContent = pct + '% · ' + mins + ' мин' + (ex.timeout ? ' · время вышло' : '');
+      if ($('exParts')) $('exParts').innerHTML =
+        '<li><span>Множественный выбор</span><span>' + fmtPts(t.tGot) + ' из ' + t.tTot + '</span></li>' +
+        '<li><span>Открытые вопросы</span><span>' + fmtPts(t.oGot) + ' из ' + t.oTot + (t.pending ? ' · не оценено: ' + t.pending : '') + '</span></li>';
+      var verdict = t.pending ? 'Оцените открытые ответы ниже — баллы добавятся к итогу.'
+        : pct >= 85 ? 'Отлично, экзамен сдан уверенно.' : pct >= 60 ? 'Неплохо, но есть пробелы. Разбор ниже.' : 'Пока слабо. Разберите ошибки и пройдите работу над ошибками.';
+      $('exVerdict').innerHTML = '<strong>' + verdict + '</strong>';
+      opens.forEach(function (o) {
+        var el = app.querySelector('[data-pts="' + o.c.uid + '"]'); if (!el) return;
+        var done = !!ex.self[o.c.uid];
+        el.textContent = done ? fmtPts(openPts(o.c, ex)) + ' из ' + REAL.oPts + ' баллов' : 'Ожидает самооценки';
+        el.className = done ? (openPts(o.c, ex) >= REAL.oPts ? 'st-ok' : 'st-bad') : 'muted';
+      });
+      save();
+    }
+    Array.prototype.forEach.call(app.querySelectorAll('input[data-u]'), function (cb) {
+      cb.addEventListener('change', function () {
+        var u = cb.getAttribute('data-u'), c = BY_UID[u];
+        var arr = Array.prototype.map.call(app.querySelectorAll('input[data-u="' + u + '"]'), function (x) { return x.checked; });
+        ex.self[u] = arr;
+        recordLast(c, arr.filter(function (x) { return x; }).length);
+        draw();
+      });
+    });
+    Array.prototype.forEach.call(app.querySelectorAll('[data-ai]'), function (b) {
+      b.addEventListener('click', function () {
+        var u = b.getAttribute('data-ai'), c = BY_UID[u], out = b.parentNode.querySelector('.aiout'), ctl = new AbortController();
+        b.hidden = true;
+        out.innerHTML = '<span class="muted">Claude проверяет ответ, это может занять до минуты…</span> <button type="button" class="linklike aistop">Остановить</button>';
+        out.querySelector('.aistop').addEventListener('click', function () { ctl.abort(); });
+        var prompt = AI_RULES + ' Проверь письменный ответ студента на открытый вопрос экзамена. Сравни с образцом по смыслу, а не дословно: примеры студента могут отличаться, если они по сути верны. ' +
+          'Верни только JSON вида {"checks": [true, false, ...], "comment": "..."}, где checks — выполнен ли каждый критерий по порядку (ровно ' + c.checks.length + ' значений), ' +
+          'comment — 2–4 предложения: что получилось и чего не хватает.\n\n' +
+          'Вопрос: ' + c.q + '. ' + c.lead + '\n\nОтвет студента:\n' + String(ex.ans[u] || '').trim() +
+          '\n\nОбразец:\n' + c.fields.map(function (f) { return f.label + ': ' + f.model; }).join('\n') +
+          '\n\nКритерии:\n' + c.checks.map(function (t, k) { return (k + 1) + '. ' + t; }).join('\n');
+        SAMPLE.json(prompt, { signal: ctl.signal }).then(function (r) {
+          var checks = (r && r.checks) || [];
+          var boxes = app.querySelectorAll('input[data-u="' + u + '"]');
+          Array.prototype.forEach.call(boxes, function (cb, k) { if (typeof checks[k] === 'boolean') cb.checked = checks[k]; });
+          ex.self[u] = Array.prototype.map.call(boxes, function (x) { return x.checked; });
+          recordLast(c, ex.self[u].filter(function (x) { return x; }).length);
+          draw();
+          out.textContent = 'Claude отметил критерии ниже, вы можете их поправить. ' + String((r && r.comment) || '');
+        }).catch(function (err) {
+          var code = err && err.code;
+          if (code === 'cancelled') { out.innerHTML = ''; b.hidden = false; return; }
+          out.textContent = code === 'invalid_json' ? 'Claude ответил в неожиданном формате. Попробуйте ещё раз.' : aiErrText(code);
+          if (!aiOff) b.hidden = false;
+        });
+      });
+    });
+    draw();
     $('newExam').addEventListener('click', function () { toTop(); showExamSetup(); });
     if ($('goErr')) $('goErr').addEventListener('click', startErrors);
   }
